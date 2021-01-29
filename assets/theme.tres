@@ -1,0 +1,24 @@
+[gd_resource type="Theme" load_steps=2 format=2]
+
+[ext_resource path="res://fonts/petscii.tres" type="DynamicFont" id=1]
+
+[resource]
+RichTextLabel/colors/Font = Color( 0, 1, 0.682353, 1 )
+RichTextLabel/colors/default_color = Color( 0, 1, 0.682353, 1 )
+RichTextLabel/colors/font_color_selected = Color( 0, 1, 0.682353, 1 )
+RichTextLabel/colors/font_color_shadow = Color( 0, 1, 0.682353, 1 )
+RichTextLabel/colors/selection_color = Color( 0, 1, 0.682353, 1 )
+RichTextLabel/constants/line_separation = 0
+RichTextLabel/constants/shadow_as_outline = 0
+RichTextLabel/constants/shadow_offset_x = 0
+RichTextLabel/constants/shadow_offset_y = 0
+RichTextLabel/constants/table_hseparation = 0
+RichTextLabel/constants/table_vseparation = 0
+RichTextLabel/fonts/Font = null
+RichTextLabel/fonts/bold_font = null
+RichTextLabel/fonts/bold_italics_font = null
+RichTextLabel/fonts/italics_font = null
+RichTextLabel/fonts/mono_font = null
+RichTextLabel/fonts/normal_font = ExtResource( 1 )
+RichTextLabel/styles/focus = null
+RichTextLabel/styles/normal = null
