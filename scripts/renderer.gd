@@ -9,7 +9,7 @@ const CHAR_AT_INV: String = "\ue680"
 const CHAR_AT: String = "\ue600"
 const CHAR_UP_ARROW: String = "\ue61e"
 const CHAR_CORNER_BOT_LEFT: String = "\ue64c"  # L
-const CHAR_CORNER_BOT_RIGHT: String = "\ue650"  # _|  // FIXME
+const CHAR_CORNER_BOT_RIGHT: String = "\ue07a"  # _|  
 const CHAR_CORNER_TOP_LEFT: String = "\ue64f"  # |``
 const CHAR_CORNER_TOP_RIGHT: String = "\ue650"  # ``|
 const CHAR_BOT_BAR: String = "\ue61f"
@@ -23,10 +23,20 @@ const CHAR_QUESTION: String = "\ue43f"
 const CHAR_DIAG_STRIPES: String = "\ue869"
 const CHAR_HALF_DITHER: String = "\ue866"
 const CHAR_X: String = "\ue8d6"
-const CHAR_HEART: String = "\ue153"
+const CHAR_HEART: String = "\u2661"
+const CHAR_FILLED_HEART: String = "\ue153"
 const CHAR_CIRCLE: String = "\ue157"
 const CHAR_FILLED_CIRCLE: String = "\ue151"
-const CHAR_DIAMOND: String = "\ue15a"
+const CHAR_DIAMOND: String = "\u2662"
+const CHAR_FILLED_DIAMOND: String = "\ue15a"
+
+const VOXEL_1x1: Array = [
+	[" ", CHAR_BOT_BAR, CHAR_BOT_BAR, CHAR_BOT_BAR],
+	[CHAR_RIGHT_BAR, CHAR_DIAG, " ", " ", CHAR_DIAG],
+	[CHAR_RIGHT_BAR, " ", CHAR_CORNER_TOP_LEFT, " ", CHAR_RIGHT_BAR],
+	[CHAR_RIGHT_BAR, " ", " ", " ", CHAR_RIGHT_BAR],
+	[" ", CHAR_DIAG, CHAR_BOT_BAR, CHAR_BOT_BAR, CHAR_CORNER_BOT_RIGHT],
+]
 
 ## Locals
 
@@ -37,10 +47,7 @@ var screen_buffer: Array = []  # 2D Array of strings to write to the text box
 
 func _ready():
 	_clear_screen_buffer()
-	var test: Array = []
-	test.append([CHAR_CORNER_BOT_LEFT, CHAR_FILLED_CIRCLE, CHAR_DIAG])
-	test.append([CHAR_ASTERICKS])
-	_copy_into_screen_buffer(test, Vector2(10,10))
+	_copy_into_screen_buffer(VOXEL_1x1, Vector2(10,10))
 	_update_screen()
 
 ##
