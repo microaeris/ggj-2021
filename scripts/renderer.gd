@@ -114,6 +114,12 @@ var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
 ## Builtin Functions
 
 func _ready():
+	var map_name = "TestMap1.map"  # TODO(jm) Don't hardcode
+	$Map.load_map(map_name)
+	print($Map.poi)
+	print($Map.map)
+	print($Map.flag)
+
 	var pos: Vector2 = Vector2(35, 10)
 	clear_screen_buffer()
 	draw_world(world, pos)
