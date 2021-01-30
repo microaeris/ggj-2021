@@ -83,23 +83,35 @@ var screen_buffer: Array = []  # 2D Array of strings to write to the text box
 #	  \
 #	   v
 #	     y
-var world: Array = [  # 3D array of bools. If true, it means a vowel exists there.
+# Test cases for unit tests
+#var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
+#	[
+#		[0, 1, 1, 1],
+#		[1, 1, 0, 1],
+#		[1, 1, 0, 1],
+#		[1, 1, 0, 1],
+#	],
+#	[
+#		[0, 0, 0, 1],
+#		[0, 0, 0, 0],
+#		[0, 0, 0, 0],
+#		[0, 0, 0, 0],
+#	],
+#	[
+#		[0, 0, 0, 1],
+#		[0, 0, 0, 0],
+#		[0, 0, 0, 0],
+#		[0, 0, 0, 0],
+#	],
+#]
+var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
 	[
-		[0, 1, 1, 1],
-		[1, 1, 0, 1],
-		[1, 1, 0, 1],
-		[1, 1, 0, 1],
+		[1, 1, 1, 1],
 	],
 	[
 		[0, 0, 0, 1],
-		[0, 0, 0, 0],
-		[0, 0, 0, 0],
-		[0, 0, 0, 0],
 	],
 	[
-		[0, 0, 0, 1],
-		[0, 0, 0, 0],
-		[0, 0, 0, 0],
 		[0, 0, 0, 0],
 	],
 ]
@@ -108,14 +120,19 @@ var world: Array = [  # 3D array of bools. If true, it means a vowel exists ther
 
 func _ready():
 	_clear_screen_buffer()
-	var pos: Vector2 = Vector2(32,20)
-	var world_pos = Vector3(3, 0, 0)
-	
+	_draw_world(world)
+	_update_screen()
+
+#	_clear_screen_buffer()
+#	var pos: Vector2 = Vector2(32,20)
+#	var world_pos = Vector3(3, 0, 0)	
 #	_draw_1x1_voxel(pos)
 #	_draw_row(3, pos, world_pos)
 #	_draw_col(1, pos, world_pos)
 #	_update_screen()
 
+#	var pos: Vector2 = Vector2(32,20)
+#	var world_pos = Vector3(3, 0, 0)
 #	assert(is_there_block_above(world_pos))
 #	world_pos.x -= 1
 #	assert(is_there_block_above(world_pos) == false)
@@ -293,17 +310,15 @@ func _add_voxel_left(pos:Vector2, world_pos: Vector3) -> bool:
 	
 	_copy_into_screen_buffer(VOXEL_ADD_LEFT, pos)
 	
-	# Count the current length of interior line and erase them.
-	var num_interior_horiz_lines = 0
+	# Erase horizontal interior lines
 	var offset_pos_to_old_interior_horiz_line: Vector2 = Vector2(6, 2)  # Constant
 	var screen_pos: Vector2 = pos + offset_pos_to_old_interior_horiz_line
 	while (screen_buffer[screen_pos.y][screen_pos.x] == CHAR_TOP_BAR):
 		screen_buffer[screen_pos.y][screen_pos.x] = " "
-		num_interior_horiz_lines += 1
 		screen_pos.x += 1
 	
 	# Draw new interior lines. Should draw two more than old value. 
-	num_interior_horiz_lines += 1
+	var num_interior_horiz_lines = _count_x_edge(world_pos)
 	var offset_pos_to_interior_horiz_line: Vector2 = Vector2(3, 2)  # Constant
 	screen_pos = pos + offset_pos_to_interior_horiz_line
 	for i in range(num_interior_horiz_lines):
@@ -311,6 +326,50 @@ func _add_voxel_left(pos:Vector2, world_pos: Vector3) -> bool:
 		screen_pos.x += 1
 
 	return true
+
+
+func _add_voxel_top(pos:Vector2, world_pos: Vector3) -> bool:
+	"""
+	Draws a new voxel on top of an existing voxel. Assumes new voxel to be added
+	is the top most layer.
+	Increases the interior line length and moves it over.
+	Args
+		pos: position in screen buffer to draw the new voxel.
+		world_pos: position of the new block in the 3D world
+	"""
+	# FIXME - need to create the array to represent the left part of a 1x1 cube.
+	
+	if world[world_pos.z - 1][world_pos.y][world_pos.x] == 0:
+		# Error out since this block doesn't exist.
+		assert("We assume we're ADDING on top of an existing block.")
+	
+	_copy_into_screen_buffer(VOXEL_ADD_TOP, pos) 
+
+	# Erase vertical interior lines
+	var offset_pos_to_old_interior_vert_line: Vector2 = Vector2(2, 6)  # Constant
+	var screen_pos: Vector2 = pos + offset_pos_to_old_interior_vert_line
+	while (screen_buffer[screen_pos.y][screen_pos.x] == CHAR_LEFT_BAR):
+		screen_buffer[screen_pos.y][screen_pos.x] = " "
+		screen_pos.y += 1
+	
+	# Draw new interior lines. 
+	var num_interior_vert_lines = _count_z_edge(world_pos) - 1
+	var offset_pos_to_interior_vert_line: Vector2 = Vector2(2, 3)  # Constant
+	screen_pos = pos + offset_pos_to_interior_vert_line
+	for i in range(num_interior_vert_lines):
+		screen_buffer[screen_pos.y][screen_pos.x] = CHAR_LEFT_BAR
+		screen_pos.y += 1
+
+	## Special cases!
+	
+	# If block exists (below and to the left).
+	if world[world_pos.z - 1][world_pos.y][world_pos.x - 1] > 0:
+		var offset_pos_to_corner: Vector2 = Vector2(0, 3)  # Constant]
+		screen_pos = pos + offset_pos_to_corner
+		_copy_into_screen_buffer(LEFT_L_CORNER, screen_pos)
+
+	return true
+
 
 ## 
 # Dummy world functions that will be replaced later
@@ -363,6 +422,10 @@ func is_valid_world_pos(world_pos: Vector3) -> bool:
 	return ((world_pos.z >= 0) && (world_pos.z < len(world))) \
 		&& ((world_pos.y >= 0) && (world_pos.y < len(world[0]))) \
 		&& ((world_pos.x >= 0) && (world_pos.x < len(world[0][0])))
+
+
+func voxel_exists_at_pos(world_pos: Vector3) -> bool:
+	return world[world_pos.z][world_pos.y][world_pos.x] > 0
 
 ##
 
@@ -447,46 +510,39 @@ func _count_z_edge(world_pos: Vector3) -> int:
 	return edge_len
 
 
-func _add_voxel_top(pos:Vector2, world_pos: Vector3) -> bool:
+func _draw_world(world: Array) -> bool:
 	"""
-	Draws a new voxel on top of an existing voxel. Assumes new voxel to be added
-	is the top most layer.
-	Increases the interior line length and moves it over.
-	Args
-		pos: position in screen buffer to draw the new voxel.
-		world_pos: position of the new block in the 3D world
+	Draws the entire world to the screen. 
 	"""
-	# FIXME - need to create the array to represent the left part of a 1x1 cube.
+	# FIXME - don't hard code the screen pos. Need to programmatically figure it out...
+	var screen_pos: Vector2 = Vector2(35, 10)
 	
-	if world[world_pos.z - 1][world_pos.y][world_pos.x] == 0:
-		# Error out since this block doesn't exist.
-		assert("We assume we're ADDING on top of an existing block.")
+	var cur_pos: Vector2 = screen_pos
 	
-	_copy_into_screen_buffer(VOXEL_ADD_TOP, pos) 
-
-	# Count the current length of interior line and erase them.
-	var num_interior_vert_lines = 0
-	var offset_pos_to_old_interior_vert_line: Vector2 = Vector2(2, 6)  # Constant
-	var screen_pos: Vector2 = pos + offset_pos_to_old_interior_vert_line
-	while (screen_buffer[screen_pos.y][screen_pos.x] == CHAR_LEFT_BAR):
-		screen_buffer[screen_pos.y][screen_pos.x] = " "
-		num_interior_vert_lines += 1
-		screen_pos.y += 1
-	
-	# Draw new interior lines. Should draw two more than old value. 
-	num_interior_vert_lines += 1
-	var offset_pos_to_interior_vert_line: Vector2 = Vector2(2, 3)  # Constant
-	screen_pos = pos + offset_pos_to_interior_vert_line
-	for i in range(num_interior_vert_lines):
-		screen_buffer[screen_pos.y][screen_pos.x] = CHAR_LEFT_BAR
-		screen_pos.y += 1
-
-	## Special cases!
-	
-	# If block exists below and to the left.
-	if world[world_pos.z - 1][world_pos.y][world_pos.x - 1] > 0:
-		var offset_pos_to_corner: Vector2 = Vector2(0, 3)  # Constant]
-		screen_pos = pos + offset_pos_to_corner
-		_copy_into_screen_buffer(LEFT_L_CORNER, screen_pos)
-
+	# Traverse back to front
+	for y in range(len(world[0])):
+		# Traverse bottom to top
+		for z in range(len(world)):
+			cur_pos.x = screen_pos.x
+			# Traverse from right to left
+			for x in range(len(world[0][0]) - 1, -1, -1):
+				var world_pos: Vector3 = Vector3(x, y, z)
+				if not voxel_exists_at_pos(world_pos):
+					continue
+				
+				if not is_there_block_right(world_pos) and \
+					not is_there_block_below(world_pos):
+					_draw_1x1_voxel(cur_pos)
+				elif not is_there_block_right(world_pos) and \
+					is_there_block_below(world_pos):
+					_add_voxel_top(cur_pos, world_pos)
+				elif is_there_block_right(world_pos) and \
+					not is_there_block_below(world_pos):
+					_add_voxel_left(cur_pos, world_pos)
+				else:
+					# FIXME - still need to code this case!!! 
+					assert("FIXME")
+				cur_pos.x -= VOXEL_WIDTH
+			cur_pos.y -= VOXEL_WIDTH
+		cur_pos.y += 1
 	return true
