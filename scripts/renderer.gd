@@ -148,46 +148,26 @@ var screen_buffer: Array = []  # 2D Array of strings to write to the text box
 # ]
 var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
 	[
-	  [1, 1, 1, 1, 1, 1],
+	  [0, 0, 1, 0, 0, 0],
 	],
 	[
-	  [1, 0, 0, 0, 0, 1],
+	  [0, 1, 1, 1, 0, 0],
 	],
 	[
-	  [1, 0, 0, 0, 0, 1],
+	  [1, 1, 1, 1, 1, 0],
 	],
 	[
-	  [1, 0, 0, 0, 0, 1],
-	],
-	[
-	  [1, 0, 0, 0, 0, 1],
-	],
-	[
-	  [1, 0, 0, 0, 0, 1],
+	  [1, 1, 0, 1, 1, 0],
 	],
 ]
 
 ## Builtin Functions
 
 func _ready():
-	# clear_screen_buffer()
-	# draw_world(world)
-	# update_screen()
-
+	var pos: Vector2 = Vector2(35, 20)
 	clear_screen_buffer()
-
-	var pos: Vector2 = Vector2(32,15)
-	var world_pos = Vector3(5, 0, 0)
-	draw_1x1_voxel(pos)
-	draw_row(5, pos, world_pos)
-	draw_col(1, pos, world_pos)
-
-	pos = Vector2(17,15)
-	world_pos = Vector3(0, 0, 0)
-	draw_col(1, pos, world_pos)
-
+	draw_world(world, pos)
 	print(hash_screen_buffer())
-#	print_screen_buffer()
 	update_screen()
 
 ##
@@ -579,21 +559,18 @@ func count_z_edge(world_pos: Vector3) -> int:
 	return edge_len
 
 
-func draw_world(world: Array) -> bool:
+func draw_world(world: Array, bottom_right_voxel_screen_pos: Vector2) -> bool:
 	"""
 	Draws the entire world to the screen.
 	"""
-	# FIXME - don't hard code the screen pos. Need to programmatically figure it out...
-	var screen_pos: Vector2 = Vector2(35, 10)
-
-	var cur_pos: Vector2 = screen_pos
+	var cur_pos: Vector2 = bottom_right_voxel_screen_pos
 
 	# Traverse back to front
 	for y in range(len(world[0])):
-		cur_pos.y = screen_pos.y + y
+		cur_pos.y = bottom_right_voxel_screen_pos.y + y
 		# Traverse bottom to top
 		for z in range(len(world)):
-			cur_pos.x = screen_pos.x
+			cur_pos.x = bottom_right_voxel_screen_pos.x
 			# Traverse from right to left
 			for x in range(len(world[0][0]) - 1, -1, -1):
 				var world_pos: Vector3 = Vector3(x, y, z)
