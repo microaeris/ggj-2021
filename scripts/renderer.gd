@@ -231,8 +231,11 @@ func _ready():
 #	expected = 1
 #	assert(_count_z_edge(test_pos) == expected, "Expected " + str(expected) + ", was " + str(_count_z_edge(test_pos)))
 
-
 ##
+
+func set_world(world_arr: Array) -> void:
+	world = world_arr
+
 
 func _clear_screen_buffer() -> void:
 	for x in range(SCREEN_CHAR_HEIGHT):
