@@ -77,6 +77,14 @@ const VOXEL_ADD_TOP_LEFT: Array = [
 	[null, " ", " ", " "],
 ]
 
+const VOXEL_ADD_INFRONT: Array = [
+	[" ", " ", " ", null],
+	[" ", CHAR_DIAG, " ", " ", CHAR_DIAG],
+	[" ", " ", CHAR_CORNER_TOP_LEFT, " ", CHAR_RIGHT_BAR],
+	[null, " ", " ", " ", CHAR_RIGHT_BAR],
+	[" ", CHAR_DIAG, CHAR_BOT_BAR, CHAR_BOT_BAR, CHAR_CORNER_BOT_RIGHT],
+]
+
 ## Locals
 
 onready var Text = $Text
@@ -92,81 +100,39 @@ var screen_buffer: Array = []  # 2D Array of strings to write to the text box
 #	  \
 #	   v
 #	     y
-# Test cases for unit tests
-#var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
-#	[
-#		[0, 1, 1, 1],
-#		[1, 1, 0, 1],
-#		[1, 1, 0, 1],
-#		[1, 1, 0, 1],
-#	],
-#	[
-#		[0, 0, 0, 1],
-#		[0, 0, 0, 0],
-#		[0, 0, 0, 0],
-#		[0, 0, 0, 0],
-#	],
-#	[
-#		[0, 0, 0, 1],
-#		[0, 0, 0, 0],
-#		[0, 0, 0, 0],
-#		[0, 0, 0, 0],
-#	],
-#]
-#var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
-#	[
-#		[1, 1, 1, 1],
-#	],
-#	[
-#		[0, 0, 1, 1],
-#	],
-#	[
-#		[0, 0, 0, 1],
-#	],
-#]
-#var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
-#	[
-#		[1, 1, 1, 1],
-#	],
-#	[
-#		[0, 0, 1, 1],
-#	],
-#	[
-#		[0, 0, 1, 1],
-#	],
-#]
-# var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
-# 	[
-# 		[1, 1, 1, 1],
-# 	],
-# 	[
-# 		[1, 1, 0, 0],
-# 	],
-# 	[
-# 		[1, 0, 0, 0],
-# 	],
-# ]
 var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
 	[
 	  [0, 0, 1, 0, 0, 0],
-	],
-	[
-	  [0, 1, 1, 1, 0, 0],
-	],
-	[
-	  [1, 1, 1, 1, 1, 0],
-	],
-	[
-	  [1, 1, 0, 1, 1, 0],
+	  [0, 0, 1, 0, 0, 0],
+	  [0, 0, 1, 0, 0, 0],
+	  [0, 0, 1, 0, 0, 0],
+	  [0, 0, 1, 0, 0, 0],
+	  [0, 0, 1, 0, 0, 0],
 	],
 ]
 
 ## Builtin Functions
 
 func _ready():
-	var pos: Vector2 = Vector2(35, 20)
+#	var pos: Vector2 = Vector2(35, 20)
+#	clear_screen_buffer()
+#	draw_world(world, pos)
+#	print(hash_screen_buffer())
+#	update_screen()
+
+	var pos: Vector2 = Vector2(15, 10)
 	clear_screen_buffer()
-	draw_world(world, pos)
+	draw_1x1_voxel(pos)
+	pos += Vector2(1, 1)
+	_add_voxel_infront(pos, Vector3(2, 1, 0))  # 96f1d94c3af074e77a97befcfda742120fc860dd
+	pos += Vector2(1, 1)
+	_add_voxel_infront(pos, Vector3(2, 2, 0)) # 0b1e18424892bf04a217b4e8ea7e480643640204
+	pos += Vector2(1, 1)
+	_add_voxel_infront(pos, Vector3(2, 3, 0))  # 6a02789f7011b86c28d94e1608ce4f7726a06983
+	pos += Vector2(1, 1)
+	_add_voxel_infront(pos, Vector3(2, 4, 0))  # 414276560cbbf32ae571df661f2aeac6f4757906
+	pos += Vector2(1, 1)
+	_add_voxel_infront(pos, Vector3(2, 5, 0))  # fb4ed23be51c5f1b3c335bc496289c5b9d53e5b7
 	print(hash_screen_buffer())
 	update_screen()
 
@@ -301,6 +267,7 @@ func _add_voxel_left(pos:Vector2, world_pos: Vector3) -> bool:
 
 	_copy_into_screen_buffer(VOXEL_ADD_LEFT, pos)
 	_fix_horiz_interior_lines(pos, world_pos)
+	_fix_left_t_corner(pos, world_pos)  # Special case
 
 	return true
 
@@ -337,10 +304,37 @@ func _add_voxel_top_left(pos:Vector2, world_pos: Vector3) -> bool:
 		pos: position in screen buffer to draw the new voxel.
 		world_pos: position of the new block in the 3D world
 	"""
+	if world[world_pos.z][world_pos.y][world_pos.x + 1] == 0:
+		# Error out since this block doesn't exist.
+		assert("We assume we're ADDING to an existing block.")
+
 	_copy_into_screen_buffer(VOXEL_ADD_TOP_LEFT, pos)
 	_fix_vert_interior_lines(pos, world_pos)
 	_fix_horiz_interior_lines(pos, world_pos)
 	_fix_left_l_corner(pos, world_pos)  # Special case
+	return true
+
+
+func _add_voxel_infront(pos: Vector2, world_pos: Vector3) -> bool:
+	"""
+	Draws a new voxel infront of an existing voxel. Assumes new voxel to be
+	added has no voxels to its left, above it or in front of it.
+	Increases the interior line length and moves it over.
+
+	Args
+		pos: position in screen buffer to draw the new voxel.
+		world_pos: position of the new block in the 3D world
+	"""
+
+	if world[world_pos.z][world_pos.y - 1][world_pos.x] == 0:
+		# Error out since this block doesn't exist.
+		assert("We assume we're ADDING to an existing block.")
+
+	_copy_into_screen_buffer(VOXEL_ADD_INFRONT, pos)
+	_fix_diag_interior_lines(pos, world_pos)
+#	_fix_left_l_corner(pos, world_pos)  # Special case
+#	_fix_right_l_corner(pos, world_pos)  # Special case
+
 	return true
 
 
@@ -360,11 +354,7 @@ func _fix_vert_interior_lines(pos: Vector2, world_pos: Vector3) -> void:
 	if num_interior_vert_lines == 1:
 		num_interior_vert_lines = 0
 
-	var offset_pos_to_interior_vert_line: Vector2 = Vector2(2, 3)  # Constant
-	screen_pos = pos + offset_pos_to_interior_vert_line
-	for i in range(num_interior_vert_lines):
-		screen_buffer[screen_pos.y][screen_pos.x] = CHAR_LEFT_BAR
-		screen_pos.y += 1
+	_draw_new_interior_vert_lines(pos, num_interior_vert_lines)
 
 
 func _fix_horiz_interior_lines(pos: Vector2, world_pos: Vector3) -> void:
@@ -386,12 +376,51 @@ func _fix_horiz_interior_lines(pos: Vector2, world_pos: Vector3) -> void:
 	_draw_new_interior_horiz_lines(pos, num_interior_horiz_lines)
 
 
+func _fix_diag_interior_lines(pos: Vector2, world_pos: Vector3) -> void:
+	# Erase diag interior lines
+	var offset_pos_to_old_interior_diag_line: Vector2 = Vector2(2, 2)  # Constant
+	var screen_pos: Vector2 = pos + offset_pos_to_old_interior_diag_line
+	while (screen_buffer[screen_pos.y][screen_pos.x] == CHAR_DIAG):
+		screen_buffer[screen_pos.y][screen_pos.x] = " "
+		screen_pos.y -= 1
+		screen_pos.x -= 1
+
+	# Draw new interior lines.
+	var num_interior_diag_lines = count_y_edge(world_pos)
+
+	# Special case to round down the number of interior lines. If there's only
+	# 1 block, draw no extra interior edges.
+	if num_interior_diag_lines <= 3:
+		num_interior_diag_lines = 0
+	else:
+		num_interior_diag_lines -= 3
+
+	_draw_new_interior_diag_lines(pos, num_interior_diag_lines)
+
+
 func _draw_new_interior_horiz_lines(pos: Vector2, num_lines: int) -> void:
 	var offset_pos_to_interior_horiz_line: Vector2 = Vector2(3, 2)  # Constant
 	var screen_pos = pos + offset_pos_to_interior_horiz_line
 	for i in range(num_lines):
 		screen_buffer[screen_pos.y][screen_pos.x] = CHAR_TOP_BAR
 		screen_pos.x += 1
+
+
+func _draw_new_interior_vert_lines(pos: Vector2, num_lines: int) -> void:
+	var offset_pos_to_interior_vert_line: Vector2 = Vector2(2, 3)  # Constant
+	var screen_pos = pos + offset_pos_to_interior_vert_line
+	for i in range(num_lines):
+		screen_buffer[screen_pos.y][screen_pos.x] = CHAR_LEFT_BAR
+		screen_pos.y += 1
+
+
+func _draw_new_interior_diag_lines(pos: Vector2, num_lines: int) -> void:
+	var offset_pos_to_interior_vert_line: Vector2 = Vector2(1, 1)  # Constant
+	var screen_pos = pos + offset_pos_to_interior_vert_line
+	for i in range(num_lines):
+		screen_buffer[screen_pos.y][screen_pos.x] = CHAR_DIAG
+		screen_pos.y -= 1
+		screen_pos.x -= 1
 
 
 func _fix_left_l_corner(pos: Vector2, world_pos: Vector3) -> void:
@@ -419,6 +448,18 @@ func _fix_right_l_corner(pos: Vector2, world_pos: Vector3) -> void:
 			var screen_pos = pos + offset_pos_to_corner
 			var num_interior_horiz_lines = count_x_edge(temp_2)
 			_draw_new_interior_horiz_lines(screen_pos, num_interior_horiz_lines)
+
+
+func _fix_left_t_corner(pos: Vector2, world_pos: Vector3) -> void:
+	# If a block exists below and and to the right
+	var temp: Vector3 = world_pos + Vector3(1, 0, -1)
+	if is_valid_world_pos(temp):
+		if world[temp.z][temp.y][temp.x] > 0:
+			var offset_pos_to_corner: Vector2 = Vector2(3, 2)  # Constant
+			var screen_pos = pos + offset_pos_to_corner
+			var num_interior_vert_lines = count_z_edge(temp)
+			_draw_new_interior_vert_lines(screen_pos, num_interior_vert_lines)
+
 
 ##
 # Dummy world functions that will be replaced later
@@ -575,17 +616,22 @@ func draw_world(world: Array, bottom_right_voxel_screen_pos: Vector2) -> bool:
 			for x in range(len(world[0][0]) - 1, -1, -1):
 				var world_pos: Vector3 = Vector3(x, y, z)
 				if voxel_exists_at_pos(world_pos):
-					if not is_there_block_right(world_pos) and \
-						not is_there_block_below(world_pos):
-						draw_1x1_voxel(cur_pos)
-					elif not is_there_block_right(world_pos) and \
-						is_there_block_below(world_pos):
-						_add_voxel_top(cur_pos, world_pos)
-					elif is_there_block_right(world_pos) and \
-						not is_there_block_below(world_pos):
-						_add_voxel_left(cur_pos, world_pos)
+					if not is_there_block_behind(world_pos):
+						if not is_there_block_right(world_pos) and \
+							not is_there_block_below(world_pos):
+							draw_1x1_voxel(cur_pos)
+						elif not is_there_block_right(world_pos) and \
+							is_there_block_below(world_pos):
+							_add_voxel_top(cur_pos, world_pos)
+						elif is_there_block_right(world_pos) and \
+							not is_there_block_below(world_pos):
+							_add_voxel_left(cur_pos, world_pos)
+						else:
+							_add_voxel_top_left(cur_pos, world_pos)
 					else:
-						_add_voxel_top_left(cur_pos, world_pos)
+						# Draw y dimension stuff!
+						## FIXME
+						assert(false)
 
 				cur_pos.x -= VOXEL_WIDTH
 			cur_pos.y -= VOXEL_HEIGHT

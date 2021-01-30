@@ -17,6 +17,7 @@ var test_bench = [
 	"_test_draw_u",
 	"_test_draw_donut",
 	"_test_draw_heart",
+	"_test_draw_diag",
 ]
 
 ## Builtin Callbacks
@@ -585,7 +586,7 @@ func _test_draw_donut() -> bool:
 	]
 	$Renderer.set_world(world)
 
-	var expected_screen_hash: String = "25aee81a1ee83f42e423faa2f67ff33c35cd1a32"
+	var expected_screen_hash: String = "0b9bf2a8665da9c3e5bfea0e7ddd90d607e07006"
 
 	var pos: Vector2 = Vector2(35, 20)
 	$Renderer.clear_screen_buffer()
@@ -593,6 +594,12 @@ func _test_draw_donut() -> bool:
 
 	var resulting_hash: String = $Renderer.hash_screen_buffer()
 	assert(expected_screen_hash == resulting_hash, "Expected: " + expected_screen_hash + ". Actual: " + resulting_hash)
+
+	# var pos: Vector2 = Vector2(35, 20)
+	# clear_screen_buffer()
+	# draw_world(world, pos)
+	# print(hash_screen_buffer())
+	# update_screen()
 
 	return true
 
@@ -614,13 +621,75 @@ func _test_draw_heart() -> bool:
 	]
 	$Renderer.set_world(world)
 
-	var expected_screen_hash: String = "d234a20fe3872c71cc3b4c0e011177639f66a324"
+	var expected_screen_hash: String = "5676ffe20061d8b1ce45eb6a9400e3675d72d8fa"
 
 	var pos: Vector2 = Vector2(35, 20)
 	$Renderer.clear_screen_buffer()
 	$Renderer.draw_world(world, pos)
 
 	var resulting_hash: String = $Renderer.hash_screen_buffer()
+	assert(expected_screen_hash == resulting_hash, "Expected: " + expected_screen_hash + ". Actual: " + resulting_hash)
+
+	return true
+
+
+func _test_draw_diag() -> bool:
+	var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
+		[
+		  [0, 0, 1, 0, 0, 0],
+		  [0, 0, 1, 0, 0, 0],
+		  [0, 0, 1, 0, 0, 0],
+		  [0, 0, 1, 0, 0, 0],
+		  [0, 0, 1, 0, 0, 0],
+		  [0, 0, 1, 0, 0, 0],
+		],
+	]
+	$Renderer.set_world(world)
+
+	var expected_screen_hash: String = "96f1d94c3af074e77a97befcfda742120fc860dd"
+	var pos: Vector2 = Vector2(15, 10)
+	$Renderer.clear_screen_buffer()
+	$Renderer.draw_1x1_voxel(pos)
+	pos += Vector2(1, 1)
+	$Renderer._add_voxel_infront(pos, Vector3(2, 1, 0))
+
+	var resulting_hash: String = $Renderer.hash_screen_buffer()
+	assert(expected_screen_hash == resulting_hash, "Expected: " + expected_screen_hash + ". Actual: " + resulting_hash)
+
+	##
+
+	expected_screen_hash = "0b1e18424892bf04a217b4e8ea7e480643640204"
+	pos += Vector2(1, 1)
+	$Renderer._add_voxel_infront(pos, Vector3(2, 2, 0))
+
+	resulting_hash = $Renderer.hash_screen_buffer()
+	assert(expected_screen_hash == resulting_hash, "Expected: " + expected_screen_hash + ". Actual: " + resulting_hash)
+
+	##
+
+	expected_screen_hash = "6a02789f7011b86c28d94e1608ce4f7726a06983"
+	pos += Vector2(1, 1)
+	$Renderer._add_voxel_infront(pos, Vector3(2, 3, 0))
+
+	resulting_hash = $Renderer.hash_screen_buffer()
+	assert(expected_screen_hash == resulting_hash, "Expected: " + expected_screen_hash + ". Actual: " + resulting_hash)
+
+	##
+
+	expected_screen_hash = "414276560cbbf32ae571df661f2aeac6f4757906"
+	pos += Vector2(1, 1)
+	$Renderer._add_voxel_infront(pos, Vector3(2, 4, 0))
+
+	resulting_hash = $Renderer.hash_screen_buffer()
+	assert(expected_screen_hash == resulting_hash, "Expected: " + expected_screen_hash + ". Actual: " + resulting_hash)
+
+	##
+
+	expected_screen_hash = "fb4ed23be51c5f1b3c335bc496289c5b9d53e5b7"
+	pos += Vector2(1, 1)
+	$Renderer._add_voxel_infront(pos, Vector3(2, 5, 0))
+
+	resulting_hash = $Renderer.hash_screen_buffer()
 	assert(expected_screen_hash == resulting_hash, "Expected: " + expected_screen_hash + ". Actual: " + resulting_hash)
 
 	return true
