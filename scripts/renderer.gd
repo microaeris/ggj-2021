@@ -93,26 +93,26 @@ var screen_buffer: Array = []  # 2D Array of strings to write to the text box
 #	   v
 #	     y
 # Test cases for unit tests
-var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
-	[
-		[0, 1, 1, 1],
-		[1, 1, 0, 1],
-		[1, 1, 0, 1],
-		[1, 1, 0, 1],
-	],
-	[
-		[0, 0, 0, 1],
-		[0, 0, 0, 0],
-		[0, 0, 0, 0],
-		[0, 0, 0, 0],
-	],
-	[
-		[0, 0, 0, 1],
-		[0, 0, 0, 0],
-		[0, 0, 0, 0],
-		[0, 0, 0, 0],
-	],
-]
+#var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
+#	[
+#		[0, 1, 1, 1],
+#		[1, 1, 0, 1],
+#		[1, 1, 0, 1],
+#		[1, 1, 0, 1],
+#	],
+#	[
+#		[0, 0, 0, 1],
+#		[0, 0, 0, 0],
+#		[0, 0, 0, 0],
+#		[0, 0, 0, 0],
+#	],
+#	[
+#		[0, 0, 0, 1],
+#		[0, 0, 0, 0],
+#		[0, 0, 0, 0],
+#		[0, 0, 0, 0],
+#	],
+#]
 #var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
 #	[
 #		[1, 1, 1, 1],
@@ -146,6 +146,26 @@ var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
 # 		[1, 0, 0, 0],
 # 	],
 # ]
+var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
+	[
+	  [1, 1, 1, 1, 1, 1],
+	],
+	[
+	  [1, 0, 0, 0, 0, 1],
+	],
+	[
+	  [1, 0, 0, 0, 0, 1],
+	],
+	[
+	  [1, 0, 0, 0, 0, 1],
+	],
+	[
+	  [1, 0, 0, 0, 0, 1],
+	],
+	[
+	  [1, 0, 0, 0, 0, 1],
+	],
+]
 
 ## Builtin Functions
 
@@ -155,11 +175,16 @@ func _ready():
 	# update_screen()
 
 	clear_screen_buffer()
+
 	var pos: Vector2 = Vector2(32,15)
-	var world_pos = Vector3(3, 0, 0)
+	var world_pos = Vector3(5, 0, 0)
 	draw_1x1_voxel(pos)
-	# draw_row(3, pos, world_pos)
-	# draw_col(1, pos, world_pos)
+	draw_row(5, pos, world_pos)
+
+	pos = Vector2(29,15)
+	world_pos = Vector3(0, 0, 0)
+	draw_col(1, pos, world_pos)
+
 	print(hash_screen_buffer())
 #	print_screen_buffer()
 	update_screen()
@@ -200,6 +225,7 @@ func print_screen_buffer() -> void:
 	print("[")
 	for row in screen_buffer:
 		print(row, ",")
+		# Add a delay in printing else Godot complains about overflowing the output buffer
 		yield(get_tree().create_timer(.5), "timeout")
 	print("]")
 
