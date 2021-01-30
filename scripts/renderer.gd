@@ -124,28 +124,28 @@ var screen_buffer: Array = []  # 2D Array of strings to write to the text box
 #		[0, 0, 0, 1],
 #	],
 #]
-var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
-	[
-		[1, 1, 1, 1],
-	],
-	[
-		[0, 0, 1, 1],
-	],
-	[
-		[0, 0, 1, 1],
-	],
-]
 #var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
 #	[
 #		[1, 1, 1, 1],
 #	],
 #	[
-#		[1, 1, 0, 0],
+#		[0, 0, 1, 1],
 #	],
 #	[
-#		[1, 0, 0, 0],
+#		[0, 0, 1, 1],
 #	],
 #]
+var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
+	[
+		[1, 1, 1, 1],
+	],
+	[
+		[1, 1, 0, 0],
+	],
+	[
+		[1, 0, 0, 0],
+	],
+]
 
 ## Builtin Functions
 
@@ -363,6 +363,7 @@ func _add_voxel_top(pos: Vector2, world_pos: Vector3) -> bool:
 	_copy_into_screen_buffer(VOXEL_ADD_TOP, pos) 
 	_fix_vert_interior_lines(pos, world_pos)
 	_fix_left_l_corner(pos, world_pos)  # Special case
+	_fix_right_l_corner(pos, world_pos)  # Special case
 
 	return true
 
@@ -413,7 +414,7 @@ func _fix_horiz_interior_lines(pos: Vector2, world_pos: Vector3) -> void:
 	while (screen_buffer[screen_pos.y][screen_pos.x] == CHAR_TOP_BAR):
 		screen_buffer[screen_pos.y][screen_pos.x] = " "
 		screen_pos.x += 1
-	
+
 	# Draw new interior lines. 
 	var num_interior_horiz_lines = _count_x_edge(world_pos)
 
@@ -422,9 +423,13 @@ func _fix_horiz_interior_lines(pos: Vector2, world_pos: Vector3) -> void:
 	if num_interior_horiz_lines == 1:
 		num_interior_horiz_lines = 0
 
+	_draw_new_interior_horiz_lines(pos, num_interior_horiz_lines)
+
+
+func _draw_new_interior_horiz_lines(pos: Vector2, num_lines: int) -> void:
 	var offset_pos_to_interior_horiz_line: Vector2 = Vector2(3, 2)  # Constant
-	screen_pos = pos + offset_pos_to_interior_horiz_line
-	for i in range(num_interior_horiz_lines):
+	var screen_pos = pos + offset_pos_to_interior_horiz_line
+	for i in range(num_lines):
 		screen_buffer[screen_pos.y][screen_pos.x] = CHAR_TOP_BAR
 		screen_pos.x += 1
 
@@ -434,10 +439,26 @@ func _fix_left_l_corner(pos: Vector2, world_pos: Vector3) -> void:
 	var temp: Vector3 = world_pos - Vector3(1, 0, 1)
 	if is_valid_world_pos(temp):
 		if world[temp.z][temp.y][temp.x] > 0:
-			var offset_pos_to_corner: Vector2 = Vector2(0, 3)  # Constant]
+			var offset_pos_to_corner: Vector2 = Vector2(0, 3)  # Constant
 			var screen_pos = pos + offset_pos_to_corner
 			_copy_into_screen_buffer(LEFT_L_CORNER, screen_pos)
 
+
+func _fix_right_l_corner(pos: Vector2, world_pos: Vector3) -> void:
+	# If block does not exist to the new block's right
+	# and if a block exists below and to the right
+	var temp: Vector3 = world_pos + Vector3(1, 0, 0)
+	var temp_2: Vector3 = world_pos + Vector3(1, 0, -1)
+	if is_valid_world_pos(temp) and is_valid_world_pos(temp_2):
+		if (world[temp.z][temp.y][temp.x] == 0) and \
+			(world[temp_2.z][temp_2.y][temp_2.x] > 0):
+			# This draws the horiz lines starting where the inner |`` is. 
+			# This doesn't follow how the other horiz line drawing logic places
+			# the horiz line, but that's fine.
+			var offset_pos_to_corner: Vector2 = Vector2(2, 3)  # Constant
+			var screen_pos = pos + offset_pos_to_corner
+			var num_interior_horiz_lines = _count_x_edge(temp_2)
+			_draw_new_interior_horiz_lines(screen_pos, num_interior_horiz_lines)
 
 ## 
 # Dummy world functions that will be replaced later
