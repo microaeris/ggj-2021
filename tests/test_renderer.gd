@@ -14,7 +14,7 @@ var test_bench = [
 	"_test_draw_col",
 	"_test_draw_left_l",
 	"_test_draw_right_l",
-    "_test_draw_u",
+	"_test_draw_u",
 ]
 
 ## Builtin Callbacks
@@ -501,4 +501,60 @@ func _test_draw_right_l() -> bool:
 
 
 func _test_draw_u() -> bool:
-    return true
+	var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
+		[
+		  [1, 1, 1, 1, 1, 1],
+		],
+		[
+		  [1, 0, 0, 0, 0, 1],
+		],
+		[
+		  [1, 0, 0, 0, 0, 1],
+		],
+		[
+		  [1, 0, 0, 0, 0, 1],
+		],
+		[
+		  [1, 0, 0, 0, 0, 1],
+		],
+		[
+		  [1, 0, 0, 0, 0, 1],
+		],
+	]
+	$Renderer.set_world(world)
+
+	var expected_screen_hash: String = "7ee31e2c6a008c860a2652c3e91cb93b671edc7c"
+
+	$Renderer.clear_screen_buffer()
+	var pos: Vector2 = Vector2(32,15)
+	var world_pos = Vector3(5, 0, 0)
+	$Renderer.draw_1x1_voxel(pos)
+	$Renderer.draw_row(5, pos, world_pos)
+	$Renderer.draw_col(5, pos, world_pos)
+
+	pos = Vector2(17,15)
+	world_pos = Vector3(0, 0, 0)
+	$Renderer.draw_col(5, pos, world_pos)
+
+	var resulting_hash: String = $Renderer.hash_screen_buffer()
+	assert(expected_screen_hash == resulting_hash, "Expected: " + expected_screen_hash + ". Actual: " + resulting_hash)
+
+	##
+
+	expected_screen_hash = "928d0718a3c4128dd48eeb5a36b9ec9316e9927d"
+
+	$Renderer.clear_screen_buffer()
+	pos = Vector2(32,15)
+	world_pos = Vector3(5, 0, 0)
+	$Renderer.draw_1x1_voxel(pos)
+	$Renderer.draw_row(5, pos, world_pos)
+	$Renderer.draw_col(1, pos, world_pos)
+
+	pos = Vector2(17,15)
+	world_pos = Vector3(0, 0, 0)
+	$Renderer.draw_col(1, pos, world_pos)
+
+	resulting_hash = $Renderer.hash_screen_buffer()
+	assert(expected_screen_hash == resulting_hash, "Expected: " + expected_screen_hash + ". Actual: " + resulting_hash)
+
+	return true

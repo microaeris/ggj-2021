@@ -180,8 +180,9 @@ func _ready():
 	var world_pos = Vector3(5, 0, 0)
 	draw_1x1_voxel(pos)
 	draw_row(5, pos, world_pos)
+	draw_col(1, pos, world_pos)
 
-	pos = Vector2(29,15)
+	pos = Vector2(17,15)
 	world_pos = Vector3(0, 0, 0)
 	draw_col(1, pos, world_pos)
 
