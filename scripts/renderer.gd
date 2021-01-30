@@ -93,143 +93,76 @@ var screen_buffer: Array = []  # 2D Array of strings to write to the text box
 #	   v
 #	     y
 # Test cases for unit tests
-#var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
-#	[
-#		[0, 1, 1, 1],
-#		[1, 1, 0, 1],
-#		[1, 1, 0, 1],
-#		[1, 1, 0, 1],
-#	],
-#	[
-#		[0, 0, 0, 1],
-#		[0, 0, 0, 0],
-#		[0, 0, 0, 0],
-#		[0, 0, 0, 0],
-#	],
-#	[
-#		[0, 0, 0, 1],
-#		[0, 0, 0, 0],
-#		[0, 0, 0, 0],
-#		[0, 0, 0, 0],
-#	],
-#]
-#var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
-#	[
-#		[1, 1, 1, 1],
-#	],
-#	[
-#		[0, 0, 1, 1],
-#	],
-#	[
-#		[0, 0, 0, 1],
-#	],
-#]
-#var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
-#	[
-#		[1, 1, 1, 1],
-#	],
-#	[
-#		[0, 0, 1, 1],
-#	],
-#	[
-#		[0, 0, 1, 1],
-#	],
-#]
 var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
 	[
-		[1, 1, 1, 1],
+		[0, 1, 1, 1],
+		[1, 1, 0, 1],
+		[1, 1, 0, 1],
+		[1, 1, 0, 1],
 	],
 	[
-		[1, 1, 0, 0],
+		[0, 0, 0, 1],
+		[0, 0, 0, 0],
+		[0, 0, 0, 0],
+		[0, 0, 0, 0],
 	],
 	[
-		[1, 0, 0, 0],
+		[0, 0, 0, 1],
+		[0, 0, 0, 0],
+		[0, 0, 0, 0],
+		[0, 0, 0, 0],
 	],
 ]
+#var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
+#	[
+#		[1, 1, 1, 1],
+#	],
+#	[
+#		[0, 0, 1, 1],
+#	],
+#	[
+#		[0, 0, 0, 1],
+#	],
+#]
+#var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
+#	[
+#		[1, 1, 1, 1],
+#	],
+#	[
+#		[0, 0, 1, 1],
+#	],
+#	[
+#		[0, 0, 1, 1],
+#	],
+#]
+# var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
+# 	[
+# 		[1, 1, 1, 1],
+# 	],
+# 	[
+# 		[1, 1, 0, 0],
+# 	],
+# 	[
+# 		[1, 0, 0, 0],
+# 	],
+# ]
 
 ## Builtin Functions
 
 func _ready():
-	_clear_screen_buffer()
-	_draw_world(world)
-	_update_screen()
+	# clear_screen_buffer()
+	# draw_world(world)
+	# update_screen()
 
-#	_clear_screen_buffer()
-#	var pos: Vector2 = Vector2(32,20)
-#	var world_pos = Vector3(3, 0, 0)
-#	_draw_1x1_voxel(pos)
-#	_draw_row(3, pos, world_pos)
-#	_draw_col(1, pos, world_pos)
-#	_update_screen()
-
-#	var pos: Vector2 = Vector2(32,20)
-#	var world_pos = Vector3(3, 0, 0)
-#	assert(is_there_block_above(world_pos))
-#	world_pos.x -= 1
-#	assert(is_there_block_above(world_pos) == false)
-#	assert(is_there_block_below(world_pos) == false)
-#	world_pos = Vector3(3, 0, 0)
-#	assert(is_there_block_below(world_pos) == false)
-#	world_pos.z += 1
-#	assert(is_there_block_below(world_pos) == true)
-#	world_pos = Vector3(0, 0, 1)
-#	assert(is_there_block_below(world_pos) == false)
-#	world_pos = Vector3(1, 0, 0)
-#	assert(is_there_block_left(world_pos) == false)
-#	world_pos = Vector3(2, 0, 0)
-#	assert(is_there_block_left(world_pos) == true)
-#	world_pos = Vector3(1, 0, 0)
-#	assert(is_there_block_right(world_pos) == true)
-#	world_pos = Vector3(1, 0, 1)
-#	assert(is_there_block_right(world_pos) == false)
-#	world_pos = Vector3(0, 1, 0)
-#	assert(is_there_block_infront(world_pos) == true)
-#	world_pos = Vector3(0, 0, 1)
-#	assert(is_there_block_infront(world_pos) == false)
-#	world_pos = Vector3(0, 2, 0)
-#	assert(is_there_block_behind(world_pos) == true)
-#	world_pos = Vector3(0, 1, 0)
-#	assert(is_there_block_behind(world_pos) == false)
-
-#	assert(is_valid_world_pos(Vector3(0, 0, 0)) == true)
-#	assert(is_valid_world_pos(Vector3(1, 2, 1)) == true)
-#	assert(is_valid_world_pos(Vector3(3, 3, 1)) == true)
-#	assert(is_valid_world_pos(Vector3(4, 3, 1)) == false)
-#	assert(is_valid_world_pos(Vector3(3, 4, 1)) == false)
-#	assert(is_valid_world_pos(Vector3(3, 3, 2)) == false)
-#	assert(is_valid_world_pos(Vector3(-1, 3, 1)) == false)
-
-#	assert(_count_y_edge(Vector3(0, 3, 0)) == 3, "Expected 3, was " + str(_count_y_edge(Vector3(0, 3, 0))))
-#	var test_pos = Vector3(3, 0, 1)
-#	assert(_count_y_edge(test_pos) == 1, "Expected 1, was " + str(_count_y_edge(test_pos)))
-#	test_pos = Vector3(3, 3, 0)
-#	var expected = 3
-#	assert(_count_y_edge(test_pos) == expected, "Expected " + str(expected) + ", was " + str(_count_y_edge(test_pos)))
-#	test_pos = Vector3(3, 0, 0)
-#	expected = 0
-#	assert(_count_y_edge(test_pos) == expected, "Expected " + str(expected) + ", was " + str(_count_y_edge(test_pos)))
-
-#   # Tests x edge
-#	var test_pos = Vector3(0, 3, 0)
-#	var expected = 2
-#	assert(_count_x_edge(test_pos) == expected, "Expected " + str(expected) + ", was " + str(_count_x_edge(test_pos)))
-#	test_pos = Vector3(3, 0, 1)
-#	expected = 1
-#	assert(_count_x_edge(test_pos) == expected, "Expected " + str(expected) + ", was " + str(_count_x_edge(test_pos)))
-#	test_pos = Vector3(3, 0, 0)
-#	expected = 0
-#	assert(_count_x_edge(test_pos) == expected, "Expected " + str(expected) + ", was " + str(_count_x_edge(test_pos)))
-
-#	# Tests z edge
-#	var test_pos = Vector3(3, 0, 2)
-#	var expected = 2
-#	assert(_count_z_edge(test_pos) == expected, "Expected " + str(expected) + ", was " + str(_count_z_edge(test_pos)))
-#	test_pos = Vector3(1, 3, 0)
-#	expected = 0
-#	assert(_count_z_edge(test_pos) == expected, "Expected " + str(expected) + ", was " + str(_count_z_edge(test_pos)))
-#	test_pos = Vector3(0, 3, 0)
-#	expected = 1
-#	assert(_count_z_edge(test_pos) == expected, "Expected " + str(expected) + ", was " + str(_count_z_edge(test_pos)))
+	clear_screen_buffer()
+	var pos: Vector2 = Vector2(32,15)
+	var world_pos = Vector3(3, 0, 0)
+	draw_1x1_voxel(pos)
+	# draw_row(3, pos, world_pos)
+	# draw_col(1, pos, world_pos)
+	print(hash_screen_buffer())
+#	print_screen_buffer()
+	update_screen()
 
 ##
 
@@ -237,14 +170,15 @@ func set_world(world_arr: Array) -> void:
 	world = world_arr
 
 
-func _clear_screen_buffer() -> void:
+func clear_screen_buffer() -> void:
+	screen_buffer = []
 	for x in range(SCREEN_CHAR_HEIGHT):
-		var col = []
+		var col = [null]
 		col.resize(SCREEN_CHAR_WIDTH)
 		screen_buffer.append(col)
 
 
-func _update_screen() -> void:
+func update_screen() -> void:
 	"""
 	Write out screen_buffer to the RichTextLabel.
 	"""
@@ -259,7 +193,23 @@ func _update_screen() -> void:
 			else:
 				Text.text += element
 		Text.text += "\n"
-	_clear_screen_buffer()
+	clear_screen_buffer()
+
+
+func print_screen_buffer() -> void:
+	print("[")
+	for row in screen_buffer:
+		print(row, ",")
+		yield(get_tree().create_timer(.5), "timeout")
+	print("]")
+
+
+func hash_screen_buffer() -> String:
+	"""
+	Function used in unit tests.
+	"""
+	# Return calculated hash
+	return str(screen_buffer).sha1_text()
 
 
 func is_valid_screen_coord(point: Vector2) -> bool:
@@ -288,13 +238,13 @@ func _copy_into_screen_buffer(src: Array, dest: Vector2) -> bool:
 	return true
 
 
-func _draw_1x1_voxel(pos: Vector2) -> bool:
+func draw_1x1_voxel(pos: Vector2) -> bool:
 	# FIXME - check that pos is in bounds and handle drawing part of a cube
 	_copy_into_screen_buffer(VOXEL_1x1, pos)
 	return true
 
 
-func _draw_row(num_voxels: int, pos: Vector2, world_pos: Vector3) -> bool:
+func draw_row(num_voxels: int, pos: Vector2, world_pos: Vector3) -> bool:
 	"""
 	Assumes we're appending onto existing voxels
 	Args
@@ -311,7 +261,7 @@ func _draw_row(num_voxels: int, pos: Vector2, world_pos: Vector3) -> bool:
 	return true
 
 
-func _draw_col(num_voxels: int, pos: Vector2, world_pos: Vector3) -> bool:
+func draw_col(num_voxels: int, pos: Vector2, world_pos: Vector3) -> bool:
 	"""
 	Assumes we're appending onto existing voxels
 	Args
@@ -396,7 +346,7 @@ func _fix_vert_interior_lines(pos: Vector2, world_pos: Vector3) -> void:
 		screen_pos.y += 1
 
 	# Draw new interior lines.
-	var num_interior_vert_lines = _count_z_edge(world_pos)
+	var num_interior_vert_lines = count_z_edge(world_pos)
 
 	# Special case to round down the number of interior lines. If there's only
 	# 1 block, draw no extra interior edges.
@@ -419,7 +369,7 @@ func _fix_horiz_interior_lines(pos: Vector2, world_pos: Vector3) -> void:
 		screen_pos.x += 1
 
 	# Draw new interior lines.
-	var num_interior_horiz_lines = _count_x_edge(world_pos)
+	var num_interior_horiz_lines = count_x_edge(world_pos)
 
 	# Special case to round down the number of interior lines. If there's only
 	# 1 block, draw no extra interior edges.
@@ -460,7 +410,7 @@ func _fix_right_l_corner(pos: Vector2, world_pos: Vector3) -> void:
 			# the horiz line, but that's fine.
 			var offset_pos_to_corner: Vector2 = Vector2(2, 3)  # Constant
 			var screen_pos = pos + offset_pos_to_corner
-			var num_interior_horiz_lines = _count_x_edge(temp_2)
+			var num_interior_horiz_lines = count_x_edge(temp_2)
 			_draw_new_interior_horiz_lines(screen_pos, num_interior_horiz_lines)
 
 ##
@@ -521,7 +471,7 @@ func voxel_exists_at_pos(world_pos: Vector3) -> bool:
 
 ##
 
-func _count_y_edge(world_pos: Vector3) -> int:
+func count_y_edge(world_pos: Vector3) -> int:
 	"""
 	Returns the number of continous blocks in the y direction starting at
 	world_pos. This function assumes there are no blocks in FRONT of world_pos.
@@ -548,7 +498,7 @@ func _count_y_edge(world_pos: Vector3) -> int:
 	return edge_len
 
 
-func _count_x_edge(world_pos: Vector3) -> int:
+func count_x_edge(world_pos: Vector3) -> int:
 	"""
 	Returns the number of continous blocks in the x direction starting at
 	world_pos. This function assumes there are no blocks to the left of world_pos.
@@ -575,7 +525,7 @@ func _count_x_edge(world_pos: Vector3) -> int:
 	return edge_len
 
 
-func _count_z_edge(world_pos: Vector3) -> int:
+func count_z_edge(world_pos: Vector3) -> int:
 	"""
 	Returns the number of continous blocks in the z direction starting at
 	world_pos. This function assumes there are no blocks above world_pos.
@@ -602,7 +552,7 @@ func _count_z_edge(world_pos: Vector3) -> int:
 	return edge_len
 
 
-func _draw_world(world: Array) -> bool:
+func draw_world(world: Array) -> bool:
 	"""
 	Draws the entire world to the screen.
 	"""
@@ -623,7 +573,7 @@ func _draw_world(world: Array) -> bool:
 				if voxel_exists_at_pos(world_pos):
 					if not is_there_block_right(world_pos) and \
 						not is_there_block_below(world_pos):
-						_draw_1x1_voxel(cur_pos)
+						draw_1x1_voxel(cur_pos)
 					elif not is_there_block_right(world_pos) and \
 						is_there_block_below(world_pos):
 						_add_voxel_top(cur_pos, world_pos)
