@@ -91,16 +91,24 @@ onready var Text = $Text
 var screen_buffer: Array = []  # 2D Array of strings to write to the text box
 
 # Dummy test world
-#	z
+#	z - column
 #	^
 #	|
 #	|
-#	+-----> x
+#	+-----> x - row
 #	 \
 #	  \
 #	   v
-#	     y
+#	     y - diag
 var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
+	[
+	  [0, 0, 1, 0, 0, 1],
+	  [0, 0, 0, 0, 0, 0],
+	  [0, 0, 0, 0, 0, 0],
+	  [0, 0, 0, 0, 0, 0],
+	  [0, 0, 0, 0, 0, 0],
+	  [0, 0, 0, 0, 0, 0],
+	],
 	[
 	  [0, 0, 1, 1, 1, 1],
 	  [0, 0, 1, 0, 0, 0],
@@ -108,6 +116,14 @@ var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
 	  [0, 0, 1, 0, 0, 0],
 	  [0, 0, 1, 0, 0, 0],
 	  [0, 0, 1, 0, 0, 0],
+	],
+	[
+	  [0, 0, 1, 0, 0, 1],
+	  [0, 0, 0, 0, 0, 0],
+	  [0, 0, 0, 0, 0, 0],
+	  [0, 0, 0, 0, 0, 0],
+	  [0, 0, 0, 0, 0, 0],
+	  [0, 0, 0, 0, 0, 0],
 	],
 ]
 
@@ -321,6 +337,7 @@ func _add_voxel_infront(pos: Vector2, world_pos: Vector3) -> bool:
 	_copy_into_screen_buffer(VOXEL_ADD_INFRONT, pos)
 	_fix_diag_interior_lines(pos, world_pos)
 	_fix_flat_right_t_corner(pos, world_pos)  # Special case
+	_fix_flat_forward_t_corner(pos, world_pos)  # Special case
 
 	return true
 
@@ -478,10 +495,27 @@ func _fix_flat_right_t_corner(pos: Vector2, world_pos: Vector3) -> void:
 	var temp: Vector3 = world_pos + Vector3(1, -1, 0)
 	if is_valid_world_pos(temp):
 		if world[temp.z][temp.y][temp.x] > 0:
-			var offset_pos_to_corner: Vector2 = Vector2(3, 0)  # Constant
-			var screen_pos = pos + offset_pos_to_corner
+			var offset_pos_to_interior_line: Vector2 = Vector2(5, 1)  # Constant
+			var screen_pos = pos + offset_pos_to_interior_line
 			var num_interior_vert_lines = count_x_edge(temp)
-			_draw_new_interior_horiz_lines(screen_pos, num_interior_vert_lines)
+			for i in range(num_interior_vert_lines):
+				screen_buffer[screen_pos.y][screen_pos.x] = CHAR_TOP_BAR
+				screen_pos.x += 1
+
+
+func _fix_flat_forward_t_corner(pos: Vector2, world_pos: Vector3) -> void:
+	# If a block exists behind and and below
+	var temp: Vector3 = world_pos + Vector3(0, -1, -1)
+	if is_valid_world_pos(temp):
+		if world[temp.z][temp.y][temp.x] > 0:
+			var offset_pos_to_interior_line: Vector2 = Vector2(0, 4)  # Constant
+			var screen_pos = pos + offset_pos_to_interior_line
+			var num_interior_vert_lines = count_z_edge(temp)
+			# Draw in new interior lines
+			for i in range(num_interior_vert_lines):
+				screen_buffer[screen_pos.y][screen_pos.x] = CHAR_RIGHT_BAR
+				screen_pos.x += 1
+
 
 ##
 # Dummy world functions that will be replaced later
@@ -635,7 +669,7 @@ func draw_world(world: Array, bottom_right_voxel_screen_pos: Vector2) -> bool:
 		var original_x = cur_pos.x
 		# Traverse bottom to top
 		for z in range(len(world)):
-			cur_pos.x = cur_pos.x
+			cur_pos.x = original_x
 			# Traverse from right to left
 			for x in range(len(world[0][0]) - 1, -1, -1):
 				var world_pos: Vector3 = Vector3(x, y, z)
