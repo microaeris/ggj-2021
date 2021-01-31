@@ -98,7 +98,7 @@ var world = null
 func _ready():
 	var map_name = "TestMap1.map"  # TODO(jm) Don't hardcode
 	$Map.load_map(map_name)
-	
+
 	world = $Map.map
 
 	var pos: Vector2 = Vector2(35, 10)
@@ -254,7 +254,7 @@ func _add_voxel_top(pos: Vector2, world_pos: Vector3) -> bool:
 	"""
 	# FIXME - need to create the array to represent the left part of a 1x1 cube.
 
-	if not is_there_block_below(world_pos):
+	if not $Map.is_there_block_below(world_pos):
 		# Error out since this block doesn't exist.
 		assert("We assume we're ADDING on top of an existing block.")
 
@@ -275,7 +275,7 @@ func _add_voxel_top_left(pos:Vector2, world_pos: Vector3) -> bool:
 		pos: position in screen buffer to draw the new voxel.
 		world_pos: position of the new block in the 3D world
 	"""
-	if not is_there_block_right(world_pos):
+	if not $Map.is_there_block_right(world_pos):
 		# Error out since this block doesn't exist.
 		assert("We assume we're ADDING to an existing block.")
 
@@ -297,12 +297,12 @@ func _add_voxel_infront(pos: Vector2, world_pos: Vector3) -> bool:
 		world_pos: position of the new block in the 3D world
 	"""
 
-	if not is_there_block_behind(world_pos):
+	if not $Map.is_there_block_behind(world_pos):
 		# Error out since this block doesn't exist.
 		assert("We assume we're ADDING to an existing block.")
-	if is_there_block_right(world_pos):
+	if $Map.is_there_block_right(world_pos):
 		assert("No blocks allowed to the right!!")
-	if is_there_block_below(world_pos):
+	if $Map.is_there_block_below(world_pos):
 		assert("No blocks allowed below!!")
 
 	_copy_into_screen_buffer(VOXEL_ADD_INFRONT, pos)
@@ -323,12 +323,12 @@ func _add_voxel_infront(pos: Vector2, world_pos: Vector3) -> bool:
 # 		world_pos: position of the new block in the 3D world
 # 	"""
 
-# 	if not is_there_block_behind(world_pos):
+# 	if not $Map.is_there_block_behind(world_pos):
 # 		# Error out since this block doesn't exist.
 # 		assert("We assume we're ADDING to an existing block.")
-# 	if is_there_block_right(world_pos):
+# 	if $Map.is_there_block_right(world_pos):
 # 		assert("No blocks allowed to the right!!")
-# 	if is_there_block_below(world_pos):
+# 	if $Map.is_there_block_below(world_pos):
 # 		assert("No blocks allowed below!!")
 
 # 	_copy_into_screen_buffer(VOXEL_ADD_INFRONT, pos)
@@ -470,52 +470,6 @@ func _fix_flat_right_t_corner(pos: Vector2, world_pos: Vector3) -> void:
 			var num_interior_vert_lines = count_x_edge(temp)
 			_draw_new_interior_horiz_lines(screen_pos, num_interior_vert_lines)
 
-##
-# Dummy world functions that will be replaced later
-
-# All these functions assume world_pos is a valid point in the world.
-
-func is_there_block_above(world_pos: Vector3) -> bool:
-	if (world_pos.z + 1) >= len(world):
-		# Out of bounds index. No blocks exist there.
-		return false
-	return world[world_pos.z + 1][world_pos.y][world_pos.x] > 0
-
-
-func is_there_block_below(world_pos: Vector3) -> bool:
-	if (world_pos.z - 1) < 0:
-		# Out of bounds index. No blocks exist there.
-		return false
-	return world[world_pos.z - 1][world_pos.y][world_pos.x] > 0
-
-
-func is_there_block_left(world_pos: Vector3) -> bool:
-	if (world_pos.x - 1) < 0:
-		# Out of bounds index. No blocks exist there.
-		return false
-	return world[world_pos.z][world_pos.y][world_pos.x - 1] > 0
-
-
-func is_there_block_right(world_pos: Vector3) -> bool:
-	if (world_pos.x + 1) >= len(world[0][0]):
-		# Out of bounds index. No blocks exist there.
-		return false
-	return world[world_pos.z][world_pos.y][world_pos.x + 1] > 0
-
-
-func is_there_block_behind(world_pos: Vector3) -> bool:
-	if (world_pos.y - 1) < 0:
-		# Out of bounds index. No blocks exist there.
-		return false
-	return world[world_pos.z][world_pos.y - 1][world_pos.x] > 0
-
-
-func is_there_block_infront(world_pos: Vector3) -> bool:
-	if (world_pos.y + 1) >= len(world[0]):
-		# Out of bounds index. No blocks exist there.
-		return false
-	return world[world_pos.z][world_pos.y + 1][world_pos.x] > 0
-
 
 func is_valid_world_pos(world_pos: Vector3) -> bool:
 	return ((world_pos.z >= 0) && (world_pos.z < len(world))) \
@@ -541,8 +495,8 @@ func count_y_edge(world_pos: Vector3) -> int:
 		if world[cur_pos.z][cur_pos.y][cur_pos.x] == 0:
 			break
 
-		found_new_plane = found_new_plane or is_there_block_above(cur_pos)
-		found_new_plane = found_new_plane or is_there_block_left(cur_pos)
+		found_new_plane = found_new_plane or $Map.is_there_block_above(cur_pos)
+		found_new_plane = found_new_plane or $Map.is_there_block_left(cur_pos)
 		if found_new_plane:
 			break
 		else:
@@ -568,8 +522,8 @@ func count_x_edge(world_pos: Vector3) -> int:
 		if world[cur_pos.z][cur_pos.y][cur_pos.x] == 0:
 			break
 
-		found_new_plane = found_new_plane or is_there_block_above(cur_pos)
-		found_new_plane = found_new_plane or is_there_block_infront(cur_pos)
+		found_new_plane = found_new_plane or $Map.is_there_block_above(cur_pos)
+		found_new_plane = found_new_plane or $Map.is_there_block_infront(cur_pos)
 		if found_new_plane:
 			break
 		else:
@@ -595,8 +549,8 @@ func count_z_edge(world_pos: Vector3) -> int:
 		if world[cur_pos.z][cur_pos.y][cur_pos.x] == 0:
 			break
 
-		found_new_plane = found_new_plane or is_there_block_left(cur_pos)
-		found_new_plane = found_new_plane or is_there_block_infront(cur_pos)
+		found_new_plane = found_new_plane or $Map.is_there_block_left(cur_pos)
+		found_new_plane = found_new_plane or $Map.is_there_block_infront(cur_pos)
 		if found_new_plane:
 			break
 		else:
@@ -627,15 +581,15 @@ func draw_world(world: Array, bottom_right_voxel_screen_pos: Vector2) -> bool:
 			for x in range(len(world[0][0]) - 1, -1, -1):
 				var world_pos: Vector3 = Vector3(x, y, z)
 				if voxel_exists_at_pos(world_pos):
-					if not is_there_block_behind(world_pos):
-						if not is_there_block_right(world_pos) and \
-							not is_there_block_below(world_pos):
+					if not $Map.is_there_block_behind(world_pos):
+						if not $Map.is_there_block_right(world_pos) and \
+							not $Map.is_there_block_below(world_pos):
 							draw_1x1_voxel(cur_pos)
-						elif not is_there_block_right(world_pos) and \
-							is_there_block_below(world_pos):
+						elif not $Map.is_there_block_right(world_pos) and \
+							$Map.is_there_block_below(world_pos):
 							_add_voxel_top(cur_pos, world_pos)
-						elif is_there_block_right(world_pos) and \
-							not is_there_block_below(world_pos):
+						elif $Map.is_there_block_right(world_pos) and \
+							not $Map.is_there_block_below(world_pos):
 							_add_voxel_left(cur_pos, world_pos)
 						else:
 							_add_voxel_top_left(cur_pos, world_pos)
