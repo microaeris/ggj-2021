@@ -9,6 +9,10 @@ def debug(*args):
     if DEBUG_MODE:
         print(args)
 
+class Point(object):
+    def __init__(self, x, y, z):
+        self.x = x; self.y = y; self.z = z
+
 class VoxelMap(object):
     def __init__(self, x_dim, y_dim, z_dim):
         self.x_dim = x_dim
@@ -17,6 +21,8 @@ class VoxelMap(object):
 
         self.map = [[[0 for k in xrange(z_dim)] \
             for j in xrange(y_dim)] for i in xrange(x_dim)]
+        self.poi = [[[0 for k in xrange(z_dim)] \
+            for j in xrange(y_dim)] for i in xrange(x_dim)]
 
     def get(self, x, y, z):
         return self.map[z][y][x]
@@ -24,11 +30,17 @@ class VoxelMap(object):
     def set(self, x, y, z, i):
         self.map[z][y][x] = i
 
+    def set_flag(self, x, y, z):
+        self.poi[z][y][x] = 1
+
+    def dump(self):
+        print(self.poi)
+        print(self.map)
 
 def int32(buffer, offset):
     return struct.unpack("I", buffer[offset:offset+4])[0]
 
-def parse_vox(buffer):
+def build_map(buffer, flag_pos):
     if len(buffer) > 4 and buffer[0:4] != "VOX ":
         print("File is not valid .vox")
         return False
@@ -71,24 +83,25 @@ def parse_vox(buffer):
         map.set(x, y, z, i)
         debug(map.get(x, y, z))
 
-    print(map.map)
+    map.set_flag(flag_pos.x, flag_pos.y, flag_pos.z)
+    map.dump()
 
     return True
 
 def main():
     def usage():
-        print("cough up an input file path, bud")
+        print("%s <input .vox> x y z" % argv[0])
         exit(1)
 
     argc = len(argv)
-    if argc != 2:
+    if argc != 5:
         usage()
 
     vox_path = argv[1]
-
+    x, y, z = int(argv[2]), int(argv[3]), int(argv[4])
     vox_buffer = open(vox_path, "rb").read()
 
-    if not parse_vox(vox_buffer):
+    if not build_map(vox_buffer, Point(x, y, z)):
         print("Failed to parse .vox file")
         exit(1)
 
