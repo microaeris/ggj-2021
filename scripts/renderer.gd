@@ -291,6 +291,7 @@ func _add_voxel_top(pos: Vector2, map_pos: Vector3) -> bool:
 	_fix_vert_interior_lines(pos, map_pos)
 	_fix_left_l_corner(pos, map_pos)  # Special case
 	_fix_right_l_corner(pos, map_pos)  # Special case
+	_fix_backwards_l_corner(pos, map_pos)  # Special case
 
 	return true
 
@@ -314,6 +315,7 @@ func _add_voxel_top_left(pos:Vector2, map_pos: Vector3) -> bool:
 	_fix_left_l_corner(pos, map_pos)  # Special case
 	_fix_flat_left_l_corner(pos, map_pos)  # Special case
 	_fix_right_t_corner(pos, map_pos)  # Special case
+	_fix_backwards_l_corner(pos, map_pos)  # Special case
 	return true
 
 
@@ -380,6 +382,7 @@ func _add_voxel_infront_and_top(pos: Vector2, map_pos: Vector3) -> bool:
 	_fix_diag_interior_lines(pos, map_pos)
 	_fix_vert_interior_lines(pos, map_pos)
 	_fix_flat_right_t_corner(pos, map_pos)  # Special case
+	_fix_backwards_t_corner(pos, map_pos)  # Special case
 
 	return true
 
@@ -443,6 +446,7 @@ func _add_voxel_infront_and_left_top(pos: Vector2, map_pos: Vector3) -> bool:
 	_fix_vert_interior_lines(pos, map_pos)
 	_fix_flat_right_l_corner(pos, map_pos)  # Special case
 	_fix_right_t_corner(pos, map_pos)  # Special case
+	_fix_backwards_t_corner(pos, map_pos)  # Special case
 
 	return true
 
@@ -618,7 +622,7 @@ func _fix_forward_t_corner(pos: Vector2, map_pos: Vector3) -> void:
 			# Draw in new interior lines
 			for i in range(num_interior_vert_lines):
 				screen_buffer[screen_pos.y][screen_pos.x] = CHAR_RIGHT_BAR
-				screen_pos.x += 1
+				screen_pos.y += 1
 
 
 #	 ____
@@ -698,6 +702,63 @@ func _fix_right_t_corner(pos: Vector2, map_pos: Vector3) -> void:
 			var offset_pos_to_interior_line: Vector2 = Vector2(4, 5)  # Constant
 			var screen_pos = pos + offset_pos_to_interior_line
 			screen_buffer[screen_pos.y][screen_pos.x] = CHAR_RIGHT_BAR
+
+
+#	   ___
+#	 _|\__\
+#	|*||  |
+#	 \ |  |
+# 	  \|__|
+func _fix_backwards_l_corner(pos: Vector2, map_pos: Vector3) -> void:
+	# If there is not a block behind and there is a block behind and below...
+	var temp: Vector3 = map_pos + Vector3(0, -1, -1)
+	if $Map.is_valid_pos(temp):
+		if $Map.voxel_exists_at_pos(temp) and \
+			not $Map.is_there_block_behind(map_pos):
+			var offset_pos_to_interior_line: Vector2 = Vector2(-1, 2)  # Constant
+			var screen_pos = pos + offset_pos_to_interior_line
+			var num_interior_diag_lines = count_y_edge(temp) - 1
+			if num_interior_diag_lines > 0:
+				# Draw in new interior lines
+				for i in range(num_interior_diag_lines):
+					screen_buffer[screen_pos.y][screen_pos.x] = CHAR_DIAG
+					screen_pos.x -= 1
+					screen_pos.y -= 1
+
+#	 __
+#	|\  \
+#	\ \__\
+#	 *| x|
+#	 *|  |
+#	 \|__|
+# add to cases where we're adding top and in front (2 cases)
+func _fix_backwards_t_corner(pos: Vector2, map_pos: Vector3) -> void:
+	# If there is not a block behind and below...
+	var temp: Vector3 = map_pos + Vector3(0, -1, -1)
+	if $Map.is_valid_pos(temp):
+		if not $Map.voxel_exists_at_pos(temp):
+			# var offset_pos_to_interior_line: Vector2 = Vector2(-1, 2)  # Constant
+			# var screen_pos = pos + offset_pos_to_interior_line
+			# var num_interior_diag_lines = count_y_edge(temp) - 1
+			# if num_interior_diag_lines > 0:
+			# 	# Draw in new interior lines
+			# 	for i in range(num_interior_diag_lines):
+			# 		screen_buffer[screen_pos.y][screen_pos.x] = CHAR_DIAG
+			# 		screen_pos.x -= 1
+			# 		screen_pos.y -= 1
+
+			# Just draw two small lines manually lol
+			var offset_pos_to_interior_line: Vector2 = Vector2(0, 3)  # Constant
+			var screen_pos = pos + offset_pos_to_interior_line
+			screen_buffer[screen_pos.y][screen_pos.x] = CHAR_DIAG
+
+			var temp_2: Vector3 = map_pos + Vector3(0, 0, -1)
+			var num_interior_vert_lines: int = count_z_edge(temp_2) - 1
+			offset_pos_to_interior_line = Vector2(0, 4)
+			screen_pos = pos + offset_pos_to_interior_line
+			for i in range(num_interior_vert_lines):
+				screen_buffer[screen_pos.y][screen_pos.x] = CHAR_RIGHT_BAR
+				screen_pos.y += 1
 
 
 # drew the wrong corner...
