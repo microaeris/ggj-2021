@@ -90,35 +90,16 @@ const VOXEL_ADD_INFRONT: Array = [
 onready var Text = $Text
 var screen_buffer: Array = []  # 2D Array of strings to write to the text box
 
-# Dummy test world
-#	z
-#	^
-#	|
-#	|
-#	+-----> x
-#	 \
-#	  \
-#	   v
-#	     y
-var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
-	[
-	  [0, 0, 1, 1, 1, 1],
-	  [0, 0, 1, 0, 0, 0],
-	  [0, 0, 1, 0, 0, 0],
-	  [0, 0, 1, 0, 0, 0],
-	  [0, 0, 1, 0, 0, 0],
-	  [0, 0, 1, 0, 0, 0],
-	],
-]
+# For testing
+var world = null
 
 ## Builtin Functions
 
 func _ready():
 	var map_name = "TestMap1.map"  # TODO(jm) Don't hardcode
 	$Map.load_map(map_name)
-	print($Map.poi)
-	print($Map.map)
-	print($Map.flag)
+	
+	world = $Map.map
 
 	var pos: Vector2 = Vector2(35, 10)
 	clear_screen_buffer()
