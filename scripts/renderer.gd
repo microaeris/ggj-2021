@@ -85,6 +85,14 @@ const VOXEL_ADD_INFRONT: Array = [
 	[" ", CHAR_DIAG, CHAR_BOT_BAR, CHAR_BOT_BAR, CHAR_CORNER_BOT_RIGHT],
 ]
 
+const VOXEL_ADD_INFRONT_TOP: Array = [
+	[" ", CHAR_BOT_BAR, CHAR_BOT_BAR, CHAR_BOT_BAR],
+	[CHAR_RIGHT_BAR, CHAR_DIAG, " ", " ", CHAR_DIAG],
+	[CHAR_RIGHT_BAR, " ", CHAR_CORNER_TOP_LEFT, " ", CHAR_RIGHT_BAR],
+	[CHAR_RIGHT_BAR, " ", " ", " ", CHAR_RIGHT_BAR],
+	[" ", CHAR_DIAG, CHAR_BOT_BAR, CHAR_BOT_BAR, CHAR_CORNER_BOT_RIGHT],
+]
+
 ## Locals
 
 onready var Text = $Text
@@ -311,33 +319,42 @@ func _add_voxel_infront(pos: Vector2, map_pos: Vector3) -> bool:
 	_fix_diag_interior_lines(pos, map_pos)
 	_fix_flat_right_t_corner(pos, map_pos)  # Special case
 	_fix_flat_forward_t_corner(pos, map_pos)  # Special case
+	_fix_forward_l_corner(pos, map_pos)  # Special case
+
+	# Extra special case
+	# Retain the interior lines added by a previous block's call to _fix_forward_l_corner.
+	map_pos -= Vector3(0, 1, 0)
+	pos -= Vector2(1, 1)
+	_fix_forward_l_corner(pos, map_pos)
 
 	return true
 
 
-# func _add_voxel_infront_and_top(pos: Vector2, map_pos: Vector3) -> bool:
-# 	"""
-# 	Draws a new voxel infront of an existing voxel. Assumes new voxel to be
-# 	added has no voxels to its left, above it or in front of it.
-# 	Increases the interior line length and moves it over.
+func _add_voxel_infront_and_top(pos: Vector2, map_pos: Vector3) -> bool:
+	"""
+	Draws a new voxel infront of an existing voxel. This same new voxel is also
+	on top of an existing voxel. Assumes new voxel to be added has no voxels to 
+	its left, above it or in front of it and to its right.
+	Increases the interior line length and moves it over.
 
-# 	Args
-# 		pos: position in screen buffer to draw the new voxel.
-# 		map_pos: position of the new block in the 3D map
-# 	"""
+	Args
+		pos: position in screen buffer to draw the new voxel.
+		map_pos: position of the new block in the 3D map
+	"""
+	if not $Map.is_there_block_behind(map_pos):
+		assert("We asssume we're ADDING an existing block!")
+	if not $Map.is_there_block_below(map_pos):
+		assert("We assume we're ADDING an existing block!")
+		
+	# FIXME - maybe i should add asserts to check that there are no blocks
+	# to the left, right, above and in front. I sorta want the flexibility to 
+	# hack the renderer though for test cases. ehhh..
 
-# 	if not $Map.is_there_block_behind(map_pos):
-# 		# Error out since this block doesn't exist.
-# 		assert("We assume we're ADDING to an existing block.")
-# 	if $Map.is_there_block_right(map_pos):
-# 		assert("No blocks allowed to the right!!")
-# 	if $Map.is_there_block_below(map_pos):
-# 		assert("No blocks allowed below!!")
+	_copy_into_screen_buffer(VOXEL_ADD_INFRONT_TOP, pos)
+	_fix_diag_interior_lines(pos, map_pos)
+	_fix_vert_interior_lines(pos, map_pos)
 
-# 	_copy_into_screen_buffer(VOXEL_ADD_INFRONT, pos)
-# 	_fix_diag_interior_lines(pos, map_pos)
-
-# 	return true
+	return true
 
 
 func _fix_vert_interior_lines(pos: Vector2, map_pos: Vector3) -> void:
@@ -487,6 +504,20 @@ func _fix_flat_forward_t_corner(pos: Vector2, map_pos: Vector3) -> void:
 			# Draw in new interior lines
 			for i in range(num_interior_vert_lines):
 				screen_buffer[screen_pos.y][screen_pos.x] = CHAR_RIGHT_BAR
+				screen_pos.x += 1
+
+
+func _fix_forward_l_corner(pos: Vector2, map_pos: Vector3) -> void:
+	# If there is a block behind and above...
+	var temp: Vector3 = map_pos + Vector3(0, -1, 1)
+	if $Map.is_valid_pos(temp):
+		if $Map.voxel_exists_at_pos(temp):
+			var offset_pos_to_interior_line: Vector2 = Vector2(2, 1)  # Constant
+			var screen_pos = pos + offset_pos_to_interior_line
+			var num_interior_horiz_lines = count_x_edge(temp)
+			# Draw in new interior lines
+			for i in range(num_interior_horiz_lines):
+				screen_buffer[screen_pos.y][screen_pos.x] = CHAR_TOP_BAR
 				screen_pos.x += 1
 
 
