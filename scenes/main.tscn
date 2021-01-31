@@ -1,11 +1,35 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://assets/theme.tres" type="Theme" id=1]
+[ext_resource path="res://components/ascii_renderer.tscn" type="PackedScene" id=2]
+[ext_resource path="res://scripts/main.gd" type="Script" id=3]
 
 [node name="Main" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 theme = ExtResource( 1 )
+script = ExtResource( 3 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Renderer" parent="." instance=ExtResource( 2 )]
+
+[node name="HUD" type="RichTextLabel" parent="."]
+visible = false
+margin_left = 18.8619
+margin_top = 14.7358
+margin_right = 116.862
+margin_bottom = 25.7358
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Background" type="ColorRect" parent="HUD"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0.129412, 0, 0.0352941, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }

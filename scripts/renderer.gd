@@ -184,9 +184,14 @@ func hash_screen_buffer() -> String:
 	return str(screen_buffer).sha1_text()
 
 
-func is_valid_screen_coord(point: Vector2) -> bool:
-	return (point.y < SCREEN_CHAR_HEIGHT) and \
-		(point.x < SCREEN_CHAR_WIDTH)
+func is_greater_than_screen_range(point: Vector2) -> bool:
+	return (point.y >= SCREEN_CHAR_HEIGHT) or \
+		(point.x >= SCREEN_CHAR_WIDTH)
+
+
+func in_screen_range(point: Vector2) -> bool:
+	return (point.y >= 0) and (point.x >= 0) and \
+		(point.y < SCREEN_CHAR_HEIGHT) and (point.x < SCREEN_CHAR_WIDTH)
 
 
 func _copy_into_screen_buffer(src: Array, dest: Vector2) -> bool:
@@ -199,13 +204,34 @@ func _copy_into_screen_buffer(src: Array, dest: Vector2) -> bool:
 			If src cannot fit into the screen buffer, it will be cut off.
 			Writing a " " (space) clears the existing character.
 	"""
-	if not is_valid_screen_coord(dest):
+	if is_greater_than_screen_range(dest):
 		return false
 
-	for y in range(len(src)):
-		for x in range(len(src[y])):
+	var src_width: int = len(src[0])
+	var src_height: int = len(src)
+	var end_of_image: Vector2 = dest + Vector2(src_width, src_height)
+	if not in_screen_range(end_of_image):
+		# Nothing to copy
+		return false
+
+	# Edge case handling
+	var x_start: int = 0
+	var y_start: int = 0
+	if dest.x < 0:
+		x_start = abs(dest.x)
+		dest.x = 0
+	if dest.y < 0:
+		y_start = abs(dest.y)
+		dest.y = 0
+
+	# Just copy the entire buffer. Or at least as much that can
+	# fit into the screen buffer.
+	for y in range(y_start, len(src)):
+		for x in range(x_start, len(src[y])):
 			if src[y][x] != null:
-				screen_buffer[dest.y + y][dest.x + x] = src[y][x]
+				# Cut off any part of the src that doesn't fit into the buffer
+				if in_screen_range(Vector2(dest.x + x, dest.y + y)):
+					screen_buffer[dest.y + y][dest.x + x] = src[y][x]
 
 	return true
 
