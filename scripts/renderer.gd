@@ -89,8 +89,6 @@ const VOXEL_ADD_INFRONT: Array = [
 
 onready var Text = $Text
 var screen_buffer: Array = []  # 2D Array of strings to write to the text box
-
-# For testing
 var map = null
 
 ## Builtin Functions
@@ -98,7 +96,6 @@ var map = null
 func _ready():
 	var map_name = "TestMap1.map"  # TODO(jm) Don't hardcode
 	$Map.load_map(map_name)
-
 	map = $Map.map
 
 	var pos: Vector2 = Vector2(35, 10)
@@ -108,10 +105,6 @@ func _ready():
 	update_screen()
 
 ##
-
-func set_map(map_arr: Array) -> void:
-	map = map_arr
-
 
 func clear_screen_buffer() -> void:
 	screen_buffer = []
@@ -425,7 +418,7 @@ func _draw_new_interior_diag_lines(pos: Vector2, num_lines: int) -> void:
 func _fix_left_l_corner(pos: Vector2, map_pos: Vector3) -> void:
 	# If block exists (below and to the left).
 	var temp: Vector3 = map_pos - Vector3(1, 0, 1)
-	if is_valid_map_pos(temp):
+	if $Map.is_valid_pos(temp):
 		if map[temp.z][temp.y][temp.x] > 0:
 			var offset_pos_to_corner: Vector2 = Vector2(0, 3)  # Constant
 			var screen_pos = pos + offset_pos_to_corner
@@ -437,7 +430,7 @@ func _fix_right_l_corner(pos: Vector2, map_pos: Vector3) -> void:
 	# and if a block exists below and to the right
 	var temp: Vector3 = map_pos + Vector3(1, 0, 0)
 	var temp_2: Vector3 = map_pos + Vector3(1, 0, -1)
-	if is_valid_map_pos(temp) and is_valid_map_pos(temp_2):
+	if $Map.is_valid_pos(temp) and $Map.is_valid_pos(temp_2):
 		if (map[temp.z][temp.y][temp.x] == 0) and \
 			(map[temp_2.z][temp_2.y][temp_2.x] > 0):
 			# This draws the horiz lines starting where the inner |`` is.
@@ -452,7 +445,7 @@ func _fix_right_l_corner(pos: Vector2, map_pos: Vector3) -> void:
 func _fix_left_t_corner(pos: Vector2, map_pos: Vector3) -> void:
 	# If a block exists below and and to the right
 	var temp: Vector3 = map_pos + Vector3(1, 0, -1)
-	if is_valid_map_pos(temp):
+	if $Map.is_valid_pos(temp):
 		if map[temp.z][temp.y][temp.x] > 0:
 			var offset_pos_to_corner: Vector2 = Vector2(3, 2)  # Constant
 			var screen_pos = pos + offset_pos_to_corner
@@ -463,22 +456,13 @@ func _fix_left_t_corner(pos: Vector2, map_pos: Vector3) -> void:
 func _fix_flat_right_t_corner(pos: Vector2, map_pos: Vector3) -> void:
 	# If a block exists behind and and to the right
 	var temp: Vector3 = map_pos + Vector3(1, -1, 0)
-	if is_valid_map_pos(temp):
+	if $Map.is_valid_pos(temp):
 		if map[temp.z][temp.y][temp.x] > 0:
 			var offset_pos_to_corner: Vector2 = Vector2(3, 0)  # Constant
 			var screen_pos = pos + offset_pos_to_corner
 			var num_interior_vert_lines = count_x_edge(temp)
 			_draw_new_interior_horiz_lines(screen_pos, num_interior_vert_lines)
 
-
-func is_valid_map_pos(map_pos: Vector3) -> bool:
-	return ((map_pos.z >= 0) && (map_pos.z < len(map))) \
-		&& ((map_pos.y >= 0) && (map_pos.y < len(map[0]))) \
-		&& ((map_pos.x >= 0) && (map_pos.x < len(map[0][0])))
-
-
-func voxel_exists_at_pos(map_pos: Vector3) -> bool:
-	return map[map_pos.z][map_pos.y][map_pos.x] > 0
 
 ##
 
@@ -503,7 +487,7 @@ func count_y_edge(map_pos: Vector3) -> int:
 			edge_len += 1
 			cur_pos.y -= 1
 
-		if not is_valid_map_pos(cur_pos):
+		if not $Map.is_valid_pos(cur_pos):
 			break
 
 	return edge_len
@@ -530,7 +514,7 @@ func count_x_edge(map_pos: Vector3) -> int:
 			edge_len += 1
 			cur_pos.x += 1
 
-		if not is_valid_map_pos(cur_pos):
+		if not $Map.is_valid_pos(cur_pos):
 			break
 
 	return edge_len
@@ -557,7 +541,7 @@ func count_z_edge(map_pos: Vector3) -> int:
 			edge_len += 1
 			cur_pos.z -= 1
 
-		if not is_valid_map_pos(cur_pos):
+		if not $Map.is_valid_pos(cur_pos):
 			break
 
 	return edge_len
@@ -580,7 +564,7 @@ func draw_map(map: Array, bottom_right_voxel_screen_pos: Vector2) -> bool:
 			# Traverse from right to left
 			for x in range(len(map[0][0]) - 1, -1, -1):
 				var map_pos: Vector3 = Vector3(x, y, z)
-				if voxel_exists_at_pos(map_pos):
+				if $Map.voxel_exists_at_pos(map_pos):
 					if not $Map.is_there_block_behind(map_pos):
 						if not $Map.is_there_block_right(map_pos) and \
 							not $Map.is_there_block_below(map_pos):

@@ -5,7 +5,7 @@ extends Control
 # Add new test functions to this array
 var test_bench = [
 	"_test_is_there",
-	"_test_is_valid_map_pos",
+	"_test_is_valid_pos",
 	"_test_count_y_edge",
 	"_test_count_x_edge",
 	"_test_count_z_edge",
@@ -49,41 +49,41 @@ func _test_is_there() -> bool:
 		  [0, 0, 0, 0],
 	  ],
 	]
-	$Renderer.set_map(map)
+	$Map.set_map(map)
 
 	var pos: Vector2 = Vector2(32,20)
 	var map_pos = Vector3(3, 0, 0)
 
-	assert($Renderer.is_there_block_above(map_pos))
+	assert($Map.is_there_block_above(map_pos))
 	map_pos.x -= 1
-	assert($Renderer.is_there_block_above(map_pos) == false)
-	assert($Renderer.is_there_block_below(map_pos) == false)
+	assert($Map.is_there_block_above(map_pos) == false)
+	assert($Map.is_there_block_below(map_pos) == false)
 	map_pos = Vector3(3, 0, 0)
-	assert($Renderer.is_there_block_below(map_pos) == false)
+	assert($Map.is_there_block_below(map_pos) == false)
 	map_pos.z += 1
-	assert($Renderer.is_there_block_below(map_pos) == true)
+	assert($Map.is_there_block_below(map_pos) == true)
 	map_pos = Vector3(0, 0, 1)
-	assert($Renderer.is_there_block_below(map_pos) == false)
+	assert($Map.is_there_block_below(map_pos) == false)
 	map_pos = Vector3(1, 0, 0)
-	assert($Renderer.is_there_block_left(map_pos) == false)
+	assert($Map.is_there_block_left(map_pos) == false)
 	map_pos = Vector3(2, 0, 0)
-	assert($Renderer.is_there_block_left(map_pos) == true)
+	assert($Map.is_there_block_left(map_pos) == true)
 	map_pos = Vector3(1, 0, 0)
-	assert($Renderer.is_there_block_right(map_pos) == true)
+	assert($Map.is_there_block_right(map_pos) == true)
 	map_pos = Vector3(1, 0, 1)
-	assert($Renderer.is_there_block_right(map_pos) == false)
+	assert($Map.is_there_block_right(map_pos) == false)
 	map_pos = Vector3(0, 1, 0)
-	assert($Renderer.is_there_block_infront(map_pos) == true)
+	assert($Map.is_there_block_infront(map_pos) == true)
 	map_pos = Vector3(0, 0, 1)
-	assert($Renderer.is_there_block_infront(map_pos) == false)
+	assert($Map.is_there_block_infront(map_pos) == false)
 	map_pos = Vector3(0, 2, 0)
-	assert($Renderer.is_there_block_behind(map_pos) == true)
+	assert($Map.is_there_block_behind(map_pos) == true)
 	map_pos = Vector3(0, 1, 0)
-	assert($Renderer.is_there_block_behind(map_pos) == false)
+	assert($Map.is_there_block_behind(map_pos) == false)
 	return true
 
 
-func _test_is_valid_map_pos() -> bool:
+func _test_is_valid_pos() -> bool:
 	var map: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
 	  [
 		  [0, 1, 1, 1],
@@ -104,15 +104,15 @@ func _test_is_valid_map_pos() -> bool:
 		  [0, 0, 0, 0],
 	  ],
 	]
-	$Renderer.set_map(map)
+	$Map.set_map(map)
 
-	assert($Renderer.is_valid_map_pos(Vector3(0, 0, 0)) == true)
-	assert($Renderer.is_valid_map_pos(Vector3(1, 2, 1)) == true)
-	assert($Renderer.is_valid_map_pos(Vector3(3, 3, 2)) == true)
-	assert($Renderer.is_valid_map_pos(Vector3(4, 3, 1)) == false)
-	assert($Renderer.is_valid_map_pos(Vector3(3, 4, 1)) == false)
-	assert($Renderer.is_valid_map_pos(Vector3(3, 3, 3)) == false)
-	assert($Renderer.is_valid_map_pos(Vector3(-1, 3, 1)) == false)
+	assert($Map.is_valid_pos(Vector3(0, 0, 0)) == true)
+	assert($Map.is_valid_pos(Vector3(1, 2, 1)) == true)
+	assert($Map.is_valid_pos(Vector3(3, 3, 2)) == true)
+	assert($Map.is_valid_pos(Vector3(4, 3, 1)) == false)
+	assert($Map.is_valid_pos(Vector3(3, 4, 1)) == false)
+	assert($Map.is_valid_pos(Vector3(3, 3, 3)) == false)
+	assert($Map.is_valid_pos(Vector3(-1, 3, 1)) == false)
 	return true
 
 
@@ -137,7 +137,7 @@ func _test_count_y_edge() -> bool:
 		  [0, 0, 0, 0],
 	  ],
 	]
-	$Renderer.set_map(map)
+	$Map.set_map(map)
 
 	assert($Renderer.count_y_edge(Vector3(0, 3, 0)) == 3, "Expected 3, was " + str($Renderer.count_y_edge(Vector3(0, 3, 0))))
 	var test_pos = Vector3(3, 0, 2)
@@ -172,7 +172,7 @@ func _test_count_x_edge() -> bool:
 		  [0, 0, 0, 0],
 	  ],
 	]
-	$Renderer.set_map(map)
+	$Map.set_map(map)
 
 	# Tests x edge
 	var test_pos = Vector3(0, 3, 0)
@@ -211,7 +211,7 @@ func _test_count_z_edge() -> bool:
 		  [0, 0, 0, 0],
 	  ],
 	]
-	$Renderer.set_map(map)
+	$Map.set_map(map)
 
 	# Tests z edge
 	var test_pos = Vector3(3, 0, 2)
@@ -246,7 +246,7 @@ func _test_draw_row() -> bool:
 			[1, 1, 1, 1],
 		],
 	]
-	$Renderer.set_map(map)
+	$Map.set_map(map)
 
 	var expected_screen_hash: String = "4bc3e2880a6f5078f8a9074fb9179fa01bfdc194"
 
@@ -265,7 +265,7 @@ func _test_draw_row() -> bool:
 			[0, 0, 1, 1],
 		],
 	]
-	$Renderer.set_map(map)
+	$Map.set_map(map)
 
 	expected_screen_hash = "3006254908a43d96988a0ce28000408440080655"
 
@@ -284,7 +284,7 @@ func _test_draw_row() -> bool:
 			[1, 1, 1, 1, 1, 1],
 		],
 	]
-	$Renderer.set_map(map)
+	$Map.set_map(map)
 
 	expected_screen_hash = "c2bcc3be642fb559178e09e309be41437f92f5de"
 
@@ -320,7 +320,7 @@ func _test_draw_col() -> bool:
 		  [0, 0, 0, 1],
 		],
 	]
-	$Renderer.set_map(map)
+	$Map.set_map(map)
 
 	var expected_screen_hash: String = "09c3f451098b8a7cdce27af7f2356ddeec5abfa3"
 
@@ -380,7 +380,7 @@ func _test_draw_left_l() -> bool:
 		  [0, 0, 0, 0, 0, 1],
 		],
 	]
-	$Renderer.set_map(map)
+	$Map.set_map(map)
 
 	var expected_screen_hash: String = "d3d0c3a5146ac74a679d4505896904efb84ee06f"
 
@@ -444,7 +444,7 @@ func _test_draw_right_l() -> bool:
 		  [1, 0, 0, 0, 0, 1],
 		],
 	]
-	$Renderer.set_map(map)
+	$Map.set_map(map)
 
 	var expected_screen_hash: String = "5493b178cf2a5ee75989aecd890f44b12b176647"
 
@@ -483,7 +483,7 @@ func _test_draw_right_l() -> bool:
 		  [1, 0, 0, 0, 0, 1],
 		],
 	]
-	$Renderer.set_map(map)
+	$Map.set_map(map)
 
 	expected_screen_hash = "d1addce493152ab5d130c466b5756c6104336c3d"
 
@@ -524,7 +524,7 @@ func _test_draw_u() -> bool:
 		  [1, 0, 0, 0, 0, 1],
 		],
 	]
-	$Renderer.set_map(map)
+	$Map.set_map(map)
 
 	var expected_screen_hash: String = "7ee31e2c6a008c860a2652c3e91cb93b671edc7c"
 
@@ -584,7 +584,7 @@ func _test_draw_donut() -> bool:
 		  [1, 1, 1, 1, 1, 1],
 		],
 	]
-	$Renderer.set_map(map)
+	$Map.set_map(map)
 
 	var expected_screen_hash: String = "0b9bf2a8665da9c3e5bfea0e7ddd90d607e07006"
 
@@ -619,7 +619,7 @@ func _test_draw_heart() -> bool:
 		  [1, 1, 0, 1, 1, 0],
 		],
 	]
-	$Renderer.set_map(map)
+	$Map.set_map(map)
 
 	var expected_screen_hash: String = "5676ffe20061d8b1ce45eb6a9400e3675d72d8fa"
 
@@ -644,7 +644,7 @@ func _test_draw_diag() -> bool:
 		  [0, 0, 1, 0, 0, 0],
 		],
 	]
-	$Renderer.set_map(map)
+	$Map.set_map(map)
 
 	var expected_screen_hash: String = "96f1d94c3af074e77a97befcfda742120fc860dd"
 	var pos: Vector2 = Vector2(15, 10)

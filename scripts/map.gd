@@ -28,6 +28,9 @@ var flag = null
 func _ready():
 	pass
 
+func set_map(map_arr):
+	map = map_arr
+	
 func load_map(map_name):
 	if map_name == "TestMap1.map":
 		map = MAP_1_DATA
@@ -84,9 +87,8 @@ func is_valid_pos(pos: Vector3) -> bool:
 		&& ((pos.y >= 0) && (pos.y < len(map[0]))) \
 		&& ((pos.x >= 0) && (pos.x < len(map[0][0])))
 
-
-func voxel_exists_at_pos(pos: Vector3) -> bool:
-	return map[pos.z][pos.y][pos.x] > 0
+func voxel_exists_at_pos(map_pos: Vector3) -> bool:
+	return map[map_pos.z][map_pos.y][map_pos.x] > 0
 
 #func load_map(map_name):
 #	var file = File.new()
