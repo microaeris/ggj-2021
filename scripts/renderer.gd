@@ -130,11 +130,11 @@ var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
 ## Builtin Functions
 
 func _ready():
-	var map_name = "TestMap1.map"  # TODO(jm) Don't hardcode
-	$Map.load_map(map_name)
-	print($Map.poi)
-	print($Map.map)
-	print($Map.flag)
+#	var map_name = "TestMap1.map"  # TODO(jm) Don't hardcode
+#	$Map.load_map(map_name)
+#	print($Map.poi)
+#	print($Map.map)
+#	print($Map.flag)
 
 	var pos: Vector2 = Vector2(35, 10)
 	clear_screen_buffer()
@@ -348,7 +348,7 @@ func _add_voxel_infront(pos: Vector2, world_pos: Vector3) -> bool:
 	return true
 
 
-# func _add_voxel_infront(pos: Vector2, world_pos: Vector3) -> bool:
+# func _add_voxel_infront_and_top(pos: Vector2, world_pos: Vector3) -> bool:
 # 	"""
 # 	Draws a new voxel infront of an existing voxel. Assumes new voxel to be
 # 	added has no voxels to its left, above it or in front of it.
@@ -462,7 +462,7 @@ func _fix_left_l_corner(pos: Vector2, world_pos: Vector3) -> void:
 	# If block exists (below and to the left).
 	var temp: Vector3 = world_pos - Vector3(1, 0, 1)
 	if is_valid_world_pos(temp):
-		if world[temp.z][temp.y][temp.x] > 0:
+		if voxel_exists_at_pos(temp):
 			var offset_pos_to_corner: Vector2 = Vector2(0, 3)  # Constant
 			var screen_pos = pos + offset_pos_to_corner
 			_copy_into_screen_buffer(LEFT_L_CORNER, screen_pos)
@@ -474,8 +474,8 @@ func _fix_right_l_corner(pos: Vector2, world_pos: Vector3) -> void:
 	var temp: Vector3 = world_pos + Vector3(1, 0, 0)
 	var temp_2: Vector3 = world_pos + Vector3(1, 0, -1)
 	if is_valid_world_pos(temp) and is_valid_world_pos(temp_2):
-		if (world[temp.z][temp.y][temp.x] == 0) and \
-			(world[temp_2.z][temp_2.y][temp_2.x] > 0):
+		if not voxel_exists_at_pos(temp) and \
+			voxel_exists_at_pos(temp_2):
 			# This draws the horiz lines starting where the inner |`` is.
 			# This doesn't follow how the other horiz line drawing logic places
 			# the horiz line, but that's fine.
@@ -489,7 +489,7 @@ func _fix_left_t_corner(pos: Vector2, world_pos: Vector3) -> void:
 	# If a block exists below and and to the right
 	var temp: Vector3 = world_pos + Vector3(1, 0, -1)
 	if is_valid_world_pos(temp):
-		if world[temp.z][temp.y][temp.x] > 0:
+		if voxel_exists_at_pos(temp):
 			var offset_pos_to_corner: Vector2 = Vector2(3, 2)  # Constant
 			var screen_pos = pos + offset_pos_to_corner
 			var num_interior_vert_lines = count_z_edge(temp)
@@ -500,7 +500,7 @@ func _fix_flat_right_t_corner(pos: Vector2, world_pos: Vector3) -> void:
 	# If a block exists behind and and to the right
 	var temp: Vector3 = world_pos + Vector3(1, -1, 0)
 	if is_valid_world_pos(temp):
-		if world[temp.z][temp.y][temp.x] > 0:
+		if voxel_exists_at_pos(temp):
 			var offset_pos_to_interior_line: Vector2 = Vector2(5, 1)  # Constant
 			var screen_pos = pos + offset_pos_to_interior_line
 			var num_interior_vert_lines = count_x_edge(temp)
@@ -513,7 +513,7 @@ func _fix_flat_forward_t_corner(pos: Vector2, world_pos: Vector3) -> void:
 	# If a block exists behind and and below
 	var temp: Vector3 = world_pos + Vector3(0, -1, -1)
 	if is_valid_world_pos(temp):
-		if world[temp.z][temp.y][temp.x] > 0:
+		if voxel_exists_at_pos(temp):
 			var offset_pos_to_interior_line: Vector2 = Vector2(0, 4)  # Constant
 			var screen_pos = pos + offset_pos_to_interior_line
 			var num_interior_vert_lines = count_z_edge(temp)
@@ -529,7 +529,7 @@ func _fix_flat_forward_t_corner(pos: Vector2, world_pos: Vector3) -> void:
 # All these functions assume world_pos is a valid point in the world.
 
 func is_there_block_above(world_pos: Vector3) -> bool:
-	if (world_pos.z + 1) >= len(world):
+	if (world_pos.z + 1) >= get_world_len_z():
 		# Out of bounds index. No blocks exist there.
 		return false
 	return world[world_pos.z + 1][world_pos.y][world_pos.x] > 0
@@ -579,6 +579,19 @@ func is_valid_world_pos(world_pos: Vector3) -> bool:
 func voxel_exists_at_pos(world_pos: Vector3) -> bool:
 	return world[world_pos.z][world_pos.y][world_pos.x] > 0
 
+
+func get_world_len_z() -> int:
+	return len(world)
+
+
+func get_world_len_y() -> int:
+	return len(world[0])
+	
+	
+func get_world_len_x() -> int:
+	return len(world[0][0])
+
+
 ##
 
 func count_y_edge(world_pos: Vector3) -> int:
@@ -591,7 +604,7 @@ func count_y_edge(world_pos: Vector3) -> int:
 	var found_new_plane = false
 	var cur_pos = world_pos
 	while not found_new_plane:
-		if world[cur_pos.z][cur_pos.y][cur_pos.x] == 0:
+		if not voxel_exists_at_pos(cur_pos):
 			break
 
 		found_new_plane = found_new_plane or is_there_block_above(cur_pos)
@@ -618,7 +631,7 @@ func count_x_edge(world_pos: Vector3) -> int:
 	var found_new_plane = false
 	var cur_pos = world_pos
 	while not found_new_plane:
-		if world[cur_pos.z][cur_pos.y][cur_pos.x] == 0:
+		if not voxel_exists_at_pos(cur_pos):
 			break
 
 		found_new_plane = found_new_plane or is_there_block_above(cur_pos)
@@ -645,7 +658,7 @@ func count_z_edge(world_pos: Vector3) -> int:
 	var found_new_plane = false
 	var cur_pos = world_pos
 	while not found_new_plane:
-		if world[cur_pos.z][cur_pos.y][cur_pos.x] == 0:
+		if not voxel_exists_at_pos(cur_pos):
 			break
 
 		found_new_plane = found_new_plane or is_there_block_left(cur_pos)
@@ -669,15 +682,15 @@ func draw_world(world: Array, bottom_right_voxel_screen_pos: Vector2) -> bool:
 	var cur_pos: Vector2 = bottom_right_voxel_screen_pos # back most row.
 
 	# Traverse back to front
-	for y in range(len(world[0])):
+	for y in range(get_world_len_y()):
 		cur_pos.y = bottom_right_voxel_screen_pos.y + y
 		cur_pos.x = bottom_right_voxel_screen_pos.x + y
 		var original_x = cur_pos.x
 		# Traverse bottom to top
-		for z in range(len(world)):
+		for z in range(get_world_len_z()):
 			cur_pos.x = original_x
 			# Traverse from right to left
-			for x in range(len(world[0][0]) - 1, -1, -1):
+			for x in range(get_world_len_x() - 1, -1, -1):
 				var world_pos: Vector3 = Vector3(x, y, z)
 				if voxel_exists_at_pos(world_pos):
 					if not is_there_block_behind(world_pos):
