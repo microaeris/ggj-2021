@@ -5,7 +5,7 @@ extends Control
 # Add new test functions to this array
 var test_bench = [
 	"_test_is_there",
-	"_test_is_valid_world_pos",
+	"_test_is_valid_map_pos",
 	"_test_count_y_edge",
 	"_test_count_x_edge",
 	"_test_count_z_edge",
@@ -29,7 +29,7 @@ func _ready():
 ##
 
 func _test_is_there() -> bool:
-	var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
+	var map: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
 	  [
 		  [0, 1, 1, 1],
 		  [1, 1, 0, 1],
@@ -49,42 +49,42 @@ func _test_is_there() -> bool:
 		  [0, 0, 0, 0],
 	  ],
 	]
-	$Renderer.set_world(world)
+	$Renderer.set_map(map)
 
 	var pos: Vector2 = Vector2(32,20)
-	var world_pos = Vector3(3, 0, 0)
+	var map_pos = Vector3(3, 0, 0)
 
-	assert($Renderer.is_there_block_above(world_pos))
-	world_pos.x -= 1
-	assert($Renderer.is_there_block_above(world_pos) == false)
-	assert($Renderer.is_there_block_below(world_pos) == false)
-	world_pos = Vector3(3, 0, 0)
-	assert($Renderer.is_there_block_below(world_pos) == false)
-	world_pos.z += 1
-	assert($Renderer.is_there_block_below(world_pos) == true)
-	world_pos = Vector3(0, 0, 1)
-	assert($Renderer.is_there_block_below(world_pos) == false)
-	world_pos = Vector3(1, 0, 0)
-	assert($Renderer.is_there_block_left(world_pos) == false)
-	world_pos = Vector3(2, 0, 0)
-	assert($Renderer.is_there_block_left(world_pos) == true)
-	world_pos = Vector3(1, 0, 0)
-	assert($Renderer.is_there_block_right(world_pos) == true)
-	world_pos = Vector3(1, 0, 1)
-	assert($Renderer.is_there_block_right(world_pos) == false)
-	world_pos = Vector3(0, 1, 0)
-	assert($Renderer.is_there_block_infront(world_pos) == true)
-	world_pos = Vector3(0, 0, 1)
-	assert($Renderer.is_there_block_infront(world_pos) == false)
-	world_pos = Vector3(0, 2, 0)
-	assert($Renderer.is_there_block_behind(world_pos) == true)
-	world_pos = Vector3(0, 1, 0)
-	assert($Renderer.is_there_block_behind(world_pos) == false)
+	assert($Renderer.is_there_block_above(map_pos))
+	map_pos.x -= 1
+	assert($Renderer.is_there_block_above(map_pos) == false)
+	assert($Renderer.is_there_block_below(map_pos) == false)
+	map_pos = Vector3(3, 0, 0)
+	assert($Renderer.is_there_block_below(map_pos) == false)
+	map_pos.z += 1
+	assert($Renderer.is_there_block_below(map_pos) == true)
+	map_pos = Vector3(0, 0, 1)
+	assert($Renderer.is_there_block_below(map_pos) == false)
+	map_pos = Vector3(1, 0, 0)
+	assert($Renderer.is_there_block_left(map_pos) == false)
+	map_pos = Vector3(2, 0, 0)
+	assert($Renderer.is_there_block_left(map_pos) == true)
+	map_pos = Vector3(1, 0, 0)
+	assert($Renderer.is_there_block_right(map_pos) == true)
+	map_pos = Vector3(1, 0, 1)
+	assert($Renderer.is_there_block_right(map_pos) == false)
+	map_pos = Vector3(0, 1, 0)
+	assert($Renderer.is_there_block_infront(map_pos) == true)
+	map_pos = Vector3(0, 0, 1)
+	assert($Renderer.is_there_block_infront(map_pos) == false)
+	map_pos = Vector3(0, 2, 0)
+	assert($Renderer.is_there_block_behind(map_pos) == true)
+	map_pos = Vector3(0, 1, 0)
+	assert($Renderer.is_there_block_behind(map_pos) == false)
 	return true
 
 
-func _test_is_valid_world_pos() -> bool:
-	var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
+func _test_is_valid_map_pos() -> bool:
+	var map: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
 	  [
 		  [0, 1, 1, 1],
 		  [1, 1, 0, 1],
@@ -104,20 +104,20 @@ func _test_is_valid_world_pos() -> bool:
 		  [0, 0, 0, 0],
 	  ],
 	]
-	$Renderer.set_world(world)
+	$Renderer.set_map(map)
 
-	assert($Renderer.is_valid_world_pos(Vector3(0, 0, 0)) == true)
-	assert($Renderer.is_valid_world_pos(Vector3(1, 2, 1)) == true)
-	assert($Renderer.is_valid_world_pos(Vector3(3, 3, 2)) == true)
-	assert($Renderer.is_valid_world_pos(Vector3(4, 3, 1)) == false)
-	assert($Renderer.is_valid_world_pos(Vector3(3, 4, 1)) == false)
-	assert($Renderer.is_valid_world_pos(Vector3(3, 3, 3)) == false)
-	assert($Renderer.is_valid_world_pos(Vector3(-1, 3, 1)) == false)
+	assert($Renderer.is_valid_map_pos(Vector3(0, 0, 0)) == true)
+	assert($Renderer.is_valid_map_pos(Vector3(1, 2, 1)) == true)
+	assert($Renderer.is_valid_map_pos(Vector3(3, 3, 2)) == true)
+	assert($Renderer.is_valid_map_pos(Vector3(4, 3, 1)) == false)
+	assert($Renderer.is_valid_map_pos(Vector3(3, 4, 1)) == false)
+	assert($Renderer.is_valid_map_pos(Vector3(3, 3, 3)) == false)
+	assert($Renderer.is_valid_map_pos(Vector3(-1, 3, 1)) == false)
 	return true
 
 
 func _test_count_y_edge() -> bool:
-	var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
+	var map: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
 	  [
 		  [0, 1, 1, 1],
 		  [1, 1, 0, 1],
@@ -137,7 +137,7 @@ func _test_count_y_edge() -> bool:
 		  [0, 0, 0, 0],
 	  ],
 	]
-	$Renderer.set_world(world)
+	$Renderer.set_map(map)
 
 	assert($Renderer.count_y_edge(Vector3(0, 3, 0)) == 3, "Expected 3, was " + str($Renderer.count_y_edge(Vector3(0, 3, 0))))
 	var test_pos = Vector3(3, 0, 2)
@@ -152,7 +152,7 @@ func _test_count_y_edge() -> bool:
 
 
 func _test_count_x_edge() -> bool:
-	var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
+	var map: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
 	  [
 		  [0, 1, 1, 1],
 		  [1, 1, 0, 1],
@@ -172,7 +172,7 @@ func _test_count_x_edge() -> bool:
 		  [0, 0, 0, 0],
 	  ],
 	]
-	$Renderer.set_world(world)
+	$Renderer.set_map(map)
 
 	# Tests x edge
 	var test_pos = Vector3(0, 3, 0)
@@ -191,7 +191,7 @@ func _test_count_x_edge() -> bool:
 
 
 func _test_count_z_edge() -> bool:
-	var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
+	var map: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
 	  [
 		  [0, 1, 1, 1],
 		  [1, 1, 0, 1],
@@ -211,7 +211,7 @@ func _test_count_z_edge() -> bool:
 		  [0, 0, 0, 0],
 	  ],
 	]
-	$Renderer.set_world(world)
+	$Renderer.set_map(map)
 
 	# Tests z edge
 	var test_pos = Vector3(3, 0, 2)
@@ -241,58 +241,58 @@ func _test_draw_voxel() -> bool:
 
 
 func _test_draw_row() -> bool:
-	var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
+	var map: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
 		[
 			[1, 1, 1, 1],
 		],
 	]
-	$Renderer.set_world(world)
+	$Renderer.set_map(map)
 
 	var expected_screen_hash: String = "4bc3e2880a6f5078f8a9074fb9179fa01bfdc194"
 
 	$Renderer.clear_screen_buffer()
 	var pos: Vector2 = Vector2(32,15)
-	var world_pos = Vector3(3, 0, 0)
+	var map_pos = Vector3(3, 0, 0)
 	$Renderer.draw_1x1_voxel(pos)
-	$Renderer.draw_row(3, pos, world_pos)
+	$Renderer.draw_row(3, pos, map_pos)
 	var resulting_hash: String = $Renderer.hash_screen_buffer()
 	assert(expected_screen_hash == resulting_hash, "Expected: " + expected_screen_hash + ". Actual: " + resulting_hash)
 
 	##
 
-	world = [  # 3D array of bools. If >0, it means a vowel exists there.
+	map = [  # 3D array of bools. If >0, it means a vowel exists there.
 		[
 			[0, 0, 1, 1],
 		],
 	]
-	$Renderer.set_world(world)
+	$Renderer.set_map(map)
 
 	expected_screen_hash = "3006254908a43d96988a0ce28000408440080655"
 
 	$Renderer.clear_screen_buffer()
 	pos = Vector2(32,15)
-	world_pos = Vector3(3, 0, 0)
+	map_pos = Vector3(3, 0, 0)
 	$Renderer.draw_1x1_voxel(pos)
-	$Renderer.draw_row(1, pos, world_pos)
+	$Renderer.draw_row(1, pos, map_pos)
 	resulting_hash = $Renderer.hash_screen_buffer()
 	assert(expected_screen_hash == resulting_hash, "Expected: " + expected_screen_hash + ". Actual: " + resulting_hash)
 
 	##
 
-	world = [  # 3D array of bools. If >0, it means a vowel exists there.
+	map = [  # 3D array of bools. If >0, it means a vowel exists there.
 		[
 			[1, 1, 1, 1, 1, 1],
 		],
 	]
-	$Renderer.set_world(world)
+	$Renderer.set_map(map)
 
 	expected_screen_hash = "c2bcc3be642fb559178e09e309be41437f92f5de"
 
 	$Renderer.clear_screen_buffer()
 	pos = Vector2(32,15)
-	world_pos = Vector3(5, 0, 0)
+	map_pos = Vector3(5, 0, 0)
 	$Renderer.draw_1x1_voxel(pos)
-	$Renderer.draw_row(5, pos, world_pos)
+	$Renderer.draw_row(5, pos, map_pos)
 	resulting_hash = $Renderer.hash_screen_buffer()
 	assert(expected_screen_hash == resulting_hash, "Expected: " + expected_screen_hash + ". Actual: " + resulting_hash)
 
@@ -300,7 +300,7 @@ func _test_draw_row() -> bool:
 
 
 func _test_draw_col() -> bool:
-	var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
+	var map: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
 		[
 		  [0, 0, 0, 1],
 		],
@@ -320,15 +320,15 @@ func _test_draw_col() -> bool:
 		  [0, 0, 0, 1],
 		],
 	]
-	$Renderer.set_world(world)
+	$Renderer.set_map(map)
 
 	var expected_screen_hash: String = "09c3f451098b8a7cdce27af7f2356ddeec5abfa3"
 
 	$Renderer.clear_screen_buffer()
 	var pos: Vector2 = Vector2(32,15)
-	var world_pos = Vector3(3, 0, 0)
+	var map_pos = Vector3(3, 0, 0)
 	$Renderer.draw_1x1_voxel(pos)
-	$Renderer.draw_col(5, pos, world_pos)
+	$Renderer.draw_col(5, pos, map_pos)
 	var resulting_hash: String = $Renderer.hash_screen_buffer()
 	assert(expected_screen_hash == resulting_hash, "Expected: " + expected_screen_hash + ". Actual: " + resulting_hash)
 
@@ -338,9 +338,9 @@ func _test_draw_col() -> bool:
 
 	$Renderer.clear_screen_buffer()
 	pos = Vector2(32,15)
-	world_pos = Vector3(3, 0, 0)
+	map_pos = Vector3(3, 0, 0)
 	$Renderer.draw_1x1_voxel(pos)
-	$Renderer.draw_col(1, pos, world_pos)
+	$Renderer.draw_col(1, pos, map_pos)
 	resulting_hash = $Renderer.hash_screen_buffer()
 	assert(expected_screen_hash == resulting_hash, "Expected: " + expected_screen_hash + ". Actual: " + resulting_hash)
 
@@ -350,9 +350,9 @@ func _test_draw_col() -> bool:
 
 	$Renderer.clear_screen_buffer()
 	pos = Vector2(32,15)
-	world_pos = Vector3(3, 0, 0)
+	map_pos = Vector3(3, 0, 0)
 	$Renderer.draw_1x1_voxel(pos)
-	$Renderer.draw_col(2, pos, world_pos)
+	$Renderer.draw_col(2, pos, map_pos)
 	resulting_hash = $Renderer.hash_screen_buffer()
 	assert(expected_screen_hash == resulting_hash, "Expected: " + expected_screen_hash + ". Actual: " + resulting_hash)
 
@@ -360,7 +360,7 @@ func _test_draw_col() -> bool:
 
 
 func _test_draw_left_l() -> bool:
-	var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
+	var map: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
 		[
 		  [1, 1, 1, 1, 1, 1],
 		],
@@ -380,16 +380,16 @@ func _test_draw_left_l() -> bool:
 		  [0, 0, 0, 0, 0, 1],
 		],
 	]
-	$Renderer.set_world(world)
+	$Renderer.set_map(map)
 
 	var expected_screen_hash: String = "d3d0c3a5146ac74a679d4505896904efb84ee06f"
 
 	$Renderer.clear_screen_buffer()
 	var pos: Vector2 = Vector2(32,15)
-	var world_pos = Vector3(5, 0, 0)
+	var map_pos = Vector3(5, 0, 0)
 	$Renderer.draw_1x1_voxel(pos)
-	$Renderer.draw_row(5, pos, world_pos)
-	$Renderer.draw_col(5, pos, world_pos)
+	$Renderer.draw_row(5, pos, map_pos)
+	$Renderer.draw_col(5, pos, map_pos)
 	var resulting_hash: String = $Renderer.hash_screen_buffer()
 	assert(expected_screen_hash == resulting_hash, "Expected: " + expected_screen_hash + ". Actual: " + resulting_hash)
 
@@ -399,10 +399,10 @@ func _test_draw_left_l() -> bool:
 
 	$Renderer.clear_screen_buffer()
 	pos = Vector2(32,15)
-	world_pos = Vector3(5, 0, 0)
+	map_pos = Vector3(5, 0, 0)
 	$Renderer.draw_1x1_voxel(pos)
-	$Renderer.draw_row(3, pos, world_pos)
-	$Renderer.draw_col(2, pos, world_pos)
+	$Renderer.draw_row(3, pos, map_pos)
+	$Renderer.draw_col(2, pos, map_pos)
 	resulting_hash = $Renderer.hash_screen_buffer()
 	assert(expected_screen_hash == resulting_hash, "Expected: " + expected_screen_hash + ". Actual: " + resulting_hash)
 
@@ -413,10 +413,10 @@ func _test_draw_left_l() -> bool:
 
 	$Renderer.clear_screen_buffer()
 	pos = Vector2(32,15)
-	world_pos = Vector3(5, 0, 0)
+	map_pos = Vector3(5, 0, 0)
 	$Renderer.draw_1x1_voxel(pos)
-	$Renderer.draw_row(1, pos, world_pos)
-	$Renderer.draw_col(1, pos, world_pos)
+	$Renderer.draw_row(1, pos, map_pos)
+	$Renderer.draw_col(1, pos, map_pos)
 	resulting_hash = $Renderer.hash_screen_buffer()
 	assert(expected_screen_hash == resulting_hash, "Expected: " + expected_screen_hash + ". Actual: " + resulting_hash)
 
@@ -424,7 +424,7 @@ func _test_draw_left_l() -> bool:
 
 
 func _test_draw_right_l() -> bool:
-	var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
+	var map: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
 		[
 		  [1, 1, 1, 1, 1, 1],
 		],
@@ -444,26 +444,26 @@ func _test_draw_right_l() -> bool:
 		  [1, 0, 0, 0, 0, 1],
 		],
 	]
-	$Renderer.set_world(world)
+	$Renderer.set_map(map)
 
 	var expected_screen_hash: String = "5493b178cf2a5ee75989aecd890f44b12b176647"
 
 	var pos: Vector2 = Vector2(32,15)
-	var world_pos = Vector3(5, 0, 0)
+	var map_pos = Vector3(5, 0, 0)
 	$Renderer.clear_screen_buffer()
 	$Renderer.draw_1x1_voxel(pos)
-	$Renderer.draw_row(5, pos, world_pos)
+	$Renderer.draw_row(5, pos, map_pos)
 
 	pos = Vector2(17,15)
-	world_pos = Vector3(0, 0, 0)
-	$Renderer.draw_col(5, pos, world_pos)
+	map_pos = Vector3(0, 0, 0)
+	$Renderer.draw_col(5, pos, map_pos)
 
 	var resulting_hash: String = $Renderer.hash_screen_buffer()
 	assert(expected_screen_hash == resulting_hash, "Expected: " + expected_screen_hash + ". Actual: " + resulting_hash)
 
 	##
 
-	world = [
+	map = [
 		[
 		  [1, 1, 0, 1, 1, 1],
 		],
@@ -483,19 +483,19 @@ func _test_draw_right_l() -> bool:
 		  [1, 0, 0, 0, 0, 1],
 		],
 	]
-	$Renderer.set_world(world)
+	$Renderer.set_map(map)
 
 	expected_screen_hash = "d1addce493152ab5d130c466b5756c6104336c3d"
 
 	$Renderer.clear_screen_buffer()
 	pos = Vector2(32,15)
-	world_pos = Vector3(1, 0, 0)
+	map_pos = Vector3(1, 0, 0)
 	$Renderer.draw_1x1_voxel(pos)
-	$Renderer.draw_row(1, pos, world_pos)
+	$Renderer.draw_row(1, pos, map_pos)
 
 	pos = Vector2(29,15)
-	world_pos = Vector3(0, 0, 0)
-	$Renderer.draw_col(1, pos, world_pos)
+	map_pos = Vector3(0, 0, 0)
+	$Renderer.draw_col(1, pos, map_pos)
 
 	resulting_hash = $Renderer.hash_screen_buffer()
 	assert(expected_screen_hash == resulting_hash, "Expected: " + expected_screen_hash + ". Actual: " + resulting_hash)
@@ -504,7 +504,7 @@ func _test_draw_right_l() -> bool:
 
 
 func _test_draw_u() -> bool:
-	var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
+	var map: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
 		[
 		  [1, 1, 1, 1, 1, 1],
 		],
@@ -524,20 +524,20 @@ func _test_draw_u() -> bool:
 		  [1, 0, 0, 0, 0, 1],
 		],
 	]
-	$Renderer.set_world(world)
+	$Renderer.set_map(map)
 
 	var expected_screen_hash: String = "7ee31e2c6a008c860a2652c3e91cb93b671edc7c"
 
 	$Renderer.clear_screen_buffer()
 	var pos: Vector2 = Vector2(32,15)
-	var world_pos = Vector3(5, 0, 0)
+	var map_pos = Vector3(5, 0, 0)
 	$Renderer.draw_1x1_voxel(pos)
-	$Renderer.draw_row(5, pos, world_pos)
-	$Renderer.draw_col(5, pos, world_pos)
+	$Renderer.draw_row(5, pos, map_pos)
+	$Renderer.draw_col(5, pos, map_pos)
 
 	pos = Vector2(17,15)
-	world_pos = Vector3(0, 0, 0)
-	$Renderer.draw_col(5, pos, world_pos)
+	map_pos = Vector3(0, 0, 0)
+	$Renderer.draw_col(5, pos, map_pos)
 
 	var resulting_hash: String = $Renderer.hash_screen_buffer()
 	assert(expected_screen_hash == resulting_hash, "Expected: " + expected_screen_hash + ". Actual: " + resulting_hash)
@@ -548,14 +548,14 @@ func _test_draw_u() -> bool:
 
 	$Renderer.clear_screen_buffer()
 	pos = Vector2(32,15)
-	world_pos = Vector3(5, 0, 0)
+	map_pos = Vector3(5, 0, 0)
 	$Renderer.draw_1x1_voxel(pos)
-	$Renderer.draw_row(5, pos, world_pos)
-	$Renderer.draw_col(1, pos, world_pos)
+	$Renderer.draw_row(5, pos, map_pos)
+	$Renderer.draw_col(1, pos, map_pos)
 
 	pos = Vector2(17,15)
-	world_pos = Vector3(0, 0, 0)
-	$Renderer.draw_col(1, pos, world_pos)
+	map_pos = Vector3(0, 0, 0)
+	$Renderer.draw_col(1, pos, map_pos)
 
 	resulting_hash = $Renderer.hash_screen_buffer()
 	assert(expected_screen_hash == resulting_hash, "Expected: " + expected_screen_hash + ". Actual: " + resulting_hash)
@@ -564,7 +564,7 @@ func _test_draw_u() -> bool:
 
 
 func _test_draw_donut() -> bool:
-	var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
+	var map: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
 		[
 		  [1, 1, 1, 1, 1, 1],
 		],
@@ -584,20 +584,20 @@ func _test_draw_donut() -> bool:
 		  [1, 1, 1, 1, 1, 1],
 		],
 	]
-	$Renderer.set_world(world)
+	$Renderer.set_map(map)
 
 	var expected_screen_hash: String = "0b9bf2a8665da9c3e5bfea0e7ddd90d607e07006"
 
 	var pos: Vector2 = Vector2(35, 20)
 	$Renderer.clear_screen_buffer()
-	$Renderer.draw_world(world, pos)
+	$Renderer.draw_map(map, pos)
 
 	var resulting_hash: String = $Renderer.hash_screen_buffer()
 	assert(expected_screen_hash == resulting_hash, "Expected: " + expected_screen_hash + ". Actual: " + resulting_hash)
 
 	# var pos: Vector2 = Vector2(35, 20)
 	# clear_screen_buffer()
-	# draw_world(world, pos)
+	# draw_map(map, pos)
 	# print(hash_screen_buffer())
 	# update_screen()
 
@@ -605,7 +605,7 @@ func _test_draw_donut() -> bool:
 
 
 func _test_draw_heart() -> bool:
-	var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
+	var map: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
 		[
 		  [0, 0, 1, 0, 0, 0],
 		],
@@ -619,13 +619,13 @@ func _test_draw_heart() -> bool:
 		  [1, 1, 0, 1, 1, 0],
 		],
 	]
-	$Renderer.set_world(world)
+	$Renderer.set_map(map)
 
 	var expected_screen_hash: String = "5676ffe20061d8b1ce45eb6a9400e3675d72d8fa"
 
 	var pos: Vector2 = Vector2(35, 20)
 	$Renderer.clear_screen_buffer()
-	$Renderer.draw_world(world, pos)
+	$Renderer.draw_map(map, pos)
 
 	var resulting_hash: String = $Renderer.hash_screen_buffer()
 	assert(expected_screen_hash == resulting_hash, "Expected: " + expected_screen_hash + ". Actual: " + resulting_hash)
@@ -634,7 +634,7 @@ func _test_draw_heart() -> bool:
 
 
 func _test_draw_diag() -> bool:
-	var world: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
+	var map: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
 		[
 		  [0, 0, 1, 0, 0, 0],
 		  [0, 0, 1, 0, 0, 0],
@@ -644,7 +644,7 @@ func _test_draw_diag() -> bool:
 		  [0, 0, 1, 0, 0, 0],
 		],
 	]
-	$Renderer.set_world(world)
+	$Renderer.set_map(map)
 
 	var expected_screen_hash: String = "96f1d94c3af074e77a97befcfda742120fc860dd"
 	var pos: Vector2 = Vector2(15, 10)
