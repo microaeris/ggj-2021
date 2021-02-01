@@ -4,21 +4,26 @@
 [ext_resource path="res://scripts/renderer.gd" type="Script" id=2]
 [ext_resource path="res://scripts/map.gd" type="Script" id=3]
 [ext_resource path="res://assets/white.png" type="Texture" id=4]
-[ext_resource path="res://assets/CRTShader.shader" type="Shader" id=5]
-[ext_resource path="res://scripts/char_map.gd" type="Script" id=6]
+[ext_resource path="res://scripts/char_map.gd" type="Script" id=5]
+[ext_resource path="res://assets/crt.shader" type="Shader" id=6]
 
 [sub_resource type="ShaderMaterial" id=1]
-shader = ExtResource( 5 )
-shader_param/screen_width = 1024.0
-shader_param/screen_height = 600.0
-shader_param/BarrelPower = 1.05
-shader_param/color_bleeding = 1.2
-shader_param/bleeding_range_x = 2.0
-shader_param/bleeding_range_y = 2.0
-shader_param/lines_distance = 2.0
-shader_param/scan_size = 2.0
-shader_param/scanline_alpha = 0.9
-shader_param/lines_velocity = 0.0
+shader = ExtResource( 6 )
+shader_param/screen_size = Vector2( 320, 180 )
+shader_param/show_curvature = false
+shader_param/curvature_x_amount = 6.0
+shader_param/curvature_y_amount = 4.0
+shader_param/corner_color = Color( 0.0235294, 0.00784314, 0.0862745, 1 )
+shader_param/show_vignette = true
+shader_param/vignette_opacity = 0.2
+shader_param/show_horizontal_scan_lines = true
+shader_param/horizontal_scan_lines_amount = 123.3
+shader_param/horizontal_scan_lines_opacity = 0.25
+shader_param/show_vertical_scan_lines = false
+shader_param/vertical_scan_lines_amount = 320.0
+shader_param/vertical_scan_lines_opacity = 1.0
+shader_param/boost = 1.5
+shader_param/aberration_amount = 1.37
 
 [node name="Renderer" type="Control"]
 anchor_right = 1.0
@@ -57,13 +62,12 @@ __meta__ = {
 [node name="CharMap" type="Control" parent="."]
 margin_right = 40.0
 margin_bottom = 40.0
-script = ExtResource( 6 )
+script = ExtResource( 5 )
 
 [node name="CRTShader" type="TextureRect" parent="."]
-visible = false
 material = SubResource( 1 )
-margin_right = 510.0
-margin_bottom = 511.0
+anchor_right = 1.0
+anchor_bottom = 1.0
 size_flags_horizontal = 2
 size_flags_vertical = 2
 texture = ExtResource( 4 )
@@ -71,5 +75,9 @@ expand = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
-[connection signal="new_map_loaded" from="Map" to="." method="_on_Map_new_map_loaded"]
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+volume_db = -24.0
+autoplay = true
 [connection signal="new_map_loaded" from="Map" to="CharMap" method="_on_Map_new_map_loaded"]
+[connection signal="new_map_loaded" from="Map" to="." method="_on_Map_new_map_loaded"]
