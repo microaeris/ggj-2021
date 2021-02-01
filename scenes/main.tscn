@@ -1,9 +1,29 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://assets/theme.tres" type="Theme" id=1]
 [ext_resource path="res://components/ascii_renderer.tscn" type="PackedScene" id=2]
 [ext_resource path="res://scripts/main.gd" type="Script" id=3]
 [ext_resource path="res://scripts/player.gd" type="Script" id=4]
+[ext_resource path="res://assets/white.png" type="Texture" id=5]
+[ext_resource path="res://assets/crt.shader" type="Shader" id=6]
+
+[sub_resource type="ShaderMaterial" id=1]
+shader = ExtResource( 6 )
+shader_param/screen_size = Vector2( 320, 180 )
+shader_param/show_curvature = false
+shader_param/curvature_x_amount = 6.0
+shader_param/curvature_y_amount = 4.0
+shader_param/corner_color = Color( 0, 0, 0, 1 )
+shader_param/show_vignette = true
+shader_param/vignette_opacity = 0.2
+shader_param/show_horizontal_scan_lines = true
+shader_param/horizontal_scan_lines_amount = 123.3
+shader_param/horizontal_scan_lines_opacity = 0.25
+shader_param/show_vertical_scan_lines = false
+shader_param/vertical_scan_lines_amount = 320.0
+shader_param/vertical_scan_lines_opacity = 1.0
+shader_param/boost = 1.5
+shader_param/aberration_amount = 0.62
 
 [node name="Main" type="Control"]
 anchor_right = 1.0
@@ -15,6 +35,7 @@ __meta__ = {
 }
 
 [node name="Player" type="Control" parent="."]
+visible = false
 margin_right = 40.0
 margin_bottom = 40.0
 script = ExtResource( 4 )
@@ -23,6 +44,7 @@ __meta__ = {
 }
 
 [node name="Renderer" parent="." instance=ExtResource( 2 )]
+visible = false
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -47,6 +69,64 @@ __meta__ = {
 anchor_right = 1.0
 anchor_bottom = 1.0
 color = Color( 0.133333, 0.137255, 0.137255, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TitleScreen" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Background" type="ColorRect" parent="TitleScreen"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0.133333, 0.137255, 0.137255, 1 )
+
+[node name="Text" type="RichTextLabel" parent="TitleScreen"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -213.0
+margin_top = -29.5
+margin_right = 213.0
+margin_bottom = 29.5
+text = " _    ______ _  ___    ______ _  ___    ______ _  __
+| |  / / __ \\ |/ / |  / / __ \\ |/ / |  / / __ \\ |/ /
+| | / / / / /   /| | / / / / /   /| | / / / / /   / 
+| |/ / /_/ /   | | |/ / /_/ /   | | |/ / /_/ /   |  
+|___/\\____/_/|_| |___/\\____/_/|_| |___/\\____/_/|_|  
+                                                    "
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Text2" type="RichTextLabel" parent="TitleScreen"]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+margin_left = -213.0
+margin_top = -59.0
+margin_right = 213.0
+bbcode_enabled = true
+bbcode_text = "[center]By Aeris and Jordan[/center]"
+text = "By Aeris and Jordan"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CRTShader" type="TextureRect" parent="."]
+material = SubResource( 1 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+size_flags_horizontal = 2
+size_flags_vertical = 2
+texture = ExtResource( 5 )
+expand = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
