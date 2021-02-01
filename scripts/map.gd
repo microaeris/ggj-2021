@@ -1,7 +1,8 @@
 extends Control
+signal new_map_loaded
 
 # Maps, because too lazy to parse from file
-# const MAP_1_DATA = [[[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 181, 181, 181, 45, 45, 0, 0]], [[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 181, 181, 45, 45, 45, 0, 0]], [[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 181, 45, 45, 45, 144, 0, 0]], [[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 45, 45, 45, 45, 144, 0, 0]], [[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 181, 181, 181, 181, 144, 0, 0]], [[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 45, 45, 144, 144, 144, 0, 0]], [[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0]]]
+const MAP_1_DATA = [[[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 181, 181, 181, 45, 45, 0, 0]], [[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 181, 181, 45, 45, 45, 0, 0]], [[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 181, 45, 45, 45, 144, 0, 0]], [[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 45, 45, 45, 45, 144, 0, 0]], [[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 181, 181, 181, 181, 144, 0, 0]], [[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 45, 45, 144, 144, 144, 0, 0]], [[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0]]]
 #var MAP_1_DATA: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
 #	[
 #		[0, 0, 1, 0, 0, 1],
@@ -202,32 +203,32 @@ extends Control
 #		[0, 0, 0, 0, 0, 0],
 #	],
 #]
-var MAP_1_DATA: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
-	[
-		[1, 1, 1, 1],
-		[1, 0, 0, 1],
-		[1, 0, 0, 1],
-		[1, 1, 1, 1],
-	],
-	[
-		[1, 0, 0, 1],
-		[0, 0, 0, 0],
-		[0, 0, 0, 0],
-		[1, 0, 0, 1],
-	],
-	[
-		[1, 0, 0, 1],
-		[0, 0, 0, 0],
-		[0, 0, 0, 0],
-		[1, 0, 0, 1],
-	],
-	[
-		[1, 1, 1, 1],
-		[1, 0, 0, 1],
-		[1, 0, 0, 1],
-		[1, 1, 1, 1],
-	],
-]
+#var MAP_1_DATA: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
+#	[
+#		[1, 1, 1, 1],
+#		[1, 0, 0, 1],
+#		[1, 0, 0, 1],
+#		[1, 1, 1, 1],
+#	],
+#	[
+#		[1, 0, 0, 1],
+#		[0, 0, 0, 0],
+#		[0, 0, 0, 0],
+#		[1, 0, 0, 1],
+#	],
+#	[
+#		[1, 0, 0, 1],
+#		[0, 0, 0, 0],
+#		[0, 0, 0, 0],
+#		[1, 0, 0, 1],
+#	],
+#	[
+#		[1, 1, 1, 1],
+#		[1, 0, 0, 1],
+#		[1, 0, 0, 1],
+#		[1, 1, 1, 1],
+#	],
+#]
 #var MAP_1_DATA: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
 #	[
 #		[0, 0, 0, 1],
@@ -301,50 +302,51 @@ func load_map(map_name):
 		map = MAP_1_DATA
 		poi = MAP_1_POI
 		flag = MAP_1_FLAG
+		emit_signal("new_map_loaded")
 	else:
 		print("Unsupported map")
 
 func set_map(map_arr):
 	map = map_arr
 
-func is_there_block_above(pos: Vector3) -> bool:
+func is_there_voxel_above(pos: Vector3) -> bool:
 	if (pos.z + 1) >= len(map):
-		# Out of bounds index. No blocks exist there.
+		# Out of bounds index. No voxels exist there.
 		return false
 	return map[pos.z + 1][pos.y][pos.x] > 0
 
 
-func is_there_block_below(pos: Vector3) -> bool:
+func is_there_voxel_below(pos: Vector3) -> bool:
 	if (pos.z - 1) < 0:
-		# Out of bounds index. No blocks exist there.
+		# Out of bounds index. No voxels exist there.
 		return false
 	return map[pos.z - 1][pos.y][pos.x] > 0
 
 
-func is_there_block_left(pos: Vector3) -> bool:
+func is_there_voxel_left(pos: Vector3) -> bool:
 	if (pos.x - 1) < 0:
-		# Out of bounds index. No blocks exist there.
+		# Out of bounds index. No voxels exist there.
 		return false
 	return map[pos.z][pos.y][pos.x - 1] > 0
 
 
-func is_there_block_right(pos: Vector3) -> bool:
+func is_there_voxel_right(pos: Vector3) -> bool:
 	if (pos.x + 1) >= len(map[0][0]):
-		# Out of bounds index. No blocks exist there.
+		# Out of bounds index. No voxels exist there.
 		return false
 	return map[pos.z][pos.y][pos.x + 1] > 0
 
 
-func is_there_block_behind(pos: Vector3) -> bool:
+func is_there_voxel_behind(pos: Vector3) -> bool:
 	if (pos.y - 1) < 0:
-		# Out of bounds index. No blocks exist there.
+		# Out of bounds index. No voxels exist there.
 		return false
 	return map[pos.z][pos.y - 1][pos.x] > 0
 
 
-func is_there_block_infront(pos: Vector3) -> bool:
+func is_there_voxel_infront(pos: Vector3) -> bool:
 	if (pos.y + 1) >= len(map[0]):
-		# Out of bounds index. No blocks exist there.
+		# Out of bounds index. No voxels exist there.
 		return false
 	return map[pos.z][pos.y + 1][pos.x] > 0
 
@@ -369,6 +371,22 @@ func get_map_len_y() -> int:
 
 func get_map_len_x() -> int:
 	return len(map[0][0])
+
+
+func get_unique_numbers_in_map() -> Array:
+	var result_set: Array = []
+	for layer in map:
+		for row in layer:
+			for el in row:
+				# 0 means no voxel, so leave it out
+				if !result_set.has(el) and (el != 0):
+						result_set.append(el)
+	return result_set
+
+
+func get_voxel_type(pos: Vector3) -> int:
+	return map[pos.z][pos.y][pos.x]
+
 
 #func load_map(map_name):
 #	var file = File.new()

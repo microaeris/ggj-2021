@@ -2,7 +2,7 @@ extends Control
 
 ## Notes
 
-# Null values in unicode arrays denote a transparent block
+# Null values in unicode arrays denote a transparent voxel
 # Spaces means something similar. but it will override buffers they are copied to.
 
 ## Constants
@@ -30,6 +30,8 @@ const CHAR_EXCLAMATION: String = "\ue621"
 const CHAR_QUESTION: String = "\ue43f"
 const CHAR_DIAG_STRIPES: String = "\ue869"
 const CHAR_HALF_DITHER: String = "\ue866"
+const CHAR_QUARTER_DITHER: String = "\ue0de"
+const CHAR_QUARTER_FILL: String = "\ue0ff"
 const CHAR_X: String = "\ue8d6"
 const CHAR_HEART: String = "\u2661"
 const CHAR_FILLED_HEART: String = "\ue153"
@@ -37,6 +39,7 @@ const CHAR_CIRCLE: String = "\ue157"
 const CHAR_FILLED_CIRCLE: String = "\ue151"
 const CHAR_DIAMOND: String = "\u2662"
 const CHAR_FILLED_DIAMOND: String = "\ue15a"
+const CHAR_FILLED_UPPER_TRIANGLE: String = "\ue069"
 
 const VOXEL_1x1: Array = [
 	[" ", CHAR_BOT_BAR, CHAR_BOT_BAR, CHAR_BOT_BAR],
@@ -115,6 +118,14 @@ const VOXEL_ADD_INFRONT_TOP_LEFT: Array = [
 
 onready var Text = $Text
 var screen_buffer: Array = []  # 2D Array of strings to write to the text box
+var voxel_pattern_dict: Dictionary = {}
+var voxel_dither_patterns: Array = [
+	null,
+	CHAR_DIAG_STRIPES,
+	CHAR_HALF_DITHER,
+]
+# The voxel that is in the center of the screen
+var camera_center_voxel_map_coords: Vector3 = Vector3(0,0,0)
 
 # Coordinate system
 #	z - column
@@ -130,16 +141,42 @@ var screen_buffer: Array = []  # 2D Array of strings to write to the text box
 ## Builtin Functions
 
 func _ready():
-	var map_name = "TestMap1.map"  # TODO(jm) Don't hardcode
-	$Map.load_map(map_name)
+	pass
+#	var map_name = "TestMap1.map"  # TODO(jm) Don't hardcode
+#	$Map.load_map(map_name)
 
-	var pos: Vector2 = Vector2(20, 10)
-	clear_screen_buffer()
-	draw_map($Map.map, pos)
-	print(hash_screen_buffer())
-	update_screen()
+	# Code to test adding infront voxels stufffff
+#	var pos: Vector2 = Vector2(20, 10)
+#	clear_screen_buffer()
+#	draw_map($Map.map, pos)
+#	print(hash_screen_buffer())
+#	update_screen()
+
+#	var pos: Vector2 = Vector2(20, 15)
+#	clear_screen_buffer()
+#	draw_map($Map.map, pos)
+#	print(hash_screen_buffer())
+#	update_screen()
+
+#	Draw diags across screen area
+#	clear_screen_buffer()
+#	for y in range(SCREEN_CHAR_HEIGHT):
+#		for x in range(SCREEN_CHAR_WIDTH):
+#			screen_buffer[y][x] = CHAR_DIAG_STRIPES
+#	update_screen()
 
 ##
+
+func assign_voxel_to_pattern() -> void:
+	# Choose colors for Jordan's voxels
+	var unique_voxel_arr: Array = $Map.get_unique_numbers_in_map()
+	assert(unique_voxel_arr.size() < 4, "Jordan, you're using too many colors!!")
+
+	var i: int = 0
+	for voxel_num in unique_voxel_arr:
+		voxel_pattern_dict[str(voxel_num)] = voxel_dither_patterns[i]
+		i += 1
+
 
 func clear_screen_buffer() -> void:
 	screen_buffer = []
@@ -248,7 +285,7 @@ func draw_row(num_voxels: int, pos: Vector2, map_pos: Vector3) -> bool:
 	Args
 		num_voxels: number of voxels to draw in a row.
 		pos: position of existing voxel we're appending to in the screen_buffer.
-		map_pos: position of the existing block in the 3D map
+		map_pos: position of the existing voxel in the 3D map
 	"""
 	# FIXME - handle draw calls that end outside of screen buffer or start outside of screen buffer.
 
@@ -265,7 +302,7 @@ func draw_col(num_voxels: int, pos: Vector2, map_pos: Vector3) -> bool:
 	Args
 		num_voxels: number of voxels to draw in a row.
 		pos: position of existing voxel we're appending to in the screen_buffer.
-		map_pos: position of the existing block in the 3D map
+		map_pos: position of the existing voxel in the 3D map
 	"""
 	# FIXME - handle draw calls that end outside of screen buffer or start outside of screen buffer.
 
@@ -282,7 +319,7 @@ func _add_voxel_left(pos:Vector2, map_pos: Vector3) -> bool:
 	Increases the interior line length and moves it over.
 	Args
 		pos: position in screen buffer to draw the new voxel.
-		map_pos: position of the new block in the 3D map
+		map_pos: position of the new voxel in the 3D map
 	"""
 #   # Check if the voxel to our left matches the shape we expect...
 #   var pos_right: Vector2 = pos + Vector2(3, 0)
@@ -305,13 +342,13 @@ func _add_voxel_top(pos: Vector2, map_pos: Vector3) -> bool:
 	Increases the interior line length and moves it over.
 	Args
 		pos: position in screen buffer to draw the new voxel.
-		map_pos: position of the new block in the 3D map
+		map_pos: position of the new voxel in the 3D map
 	"""
 	# FIXME - need to create the array to represent the left part of a 1x1 cube.
 
-	if not $Map.is_there_block_below(map_pos):
-		# Error out since this block doesn't exist.
-		assert("We assume we're ADDING on top of an existing block.")
+	if not $Map.is_there_voxel_below(map_pos):
+		# Error out since this voxel doesn't exist.
+		assert("We assume we're ADDING on top of an existing voxel.")
 
 	_copy_into_screen_buffer(VOXEL_ADD_TOP, pos)
 	_fix_vert_interior_lines(pos, map_pos)
@@ -325,15 +362,15 @@ func _add_voxel_top(pos: Vector2, map_pos: Vector3) -> bool:
 func _add_voxel_top_left(pos:Vector2, map_pos: Vector3) -> bool:
 	"""
 	Draws a new voxel on top and to the left of an existing voxel. Assumes new
-	voxel to be added is the top most layer and as the left most block
+	voxel to be added is the top most layer and as the left most voxel
 	Increases the interior line length and moves it over.
 	Args
 		pos: position in screen buffer to draw the new voxel.
-		map_pos: position of the new block in the 3D map
+		map_pos: position of the new voxel in the 3D map
 	"""
-	if not $Map.is_there_block_right(map_pos):
-		# Error out since this block doesn't exist.
-		assert("We assume we're ADDING to an existing block.")
+	if not $Map.is_there_voxel_right(map_pos):
+		# Error out since this voxel doesn't exist.
+		assert("We assume we're ADDING to an existing voxel.")
 
 	_copy_into_screen_buffer(VOXEL_ADD_TOP_LEFT, pos)
 	_fix_vert_interior_lines(pos, map_pos)
@@ -353,16 +390,16 @@ func _add_voxel_infront(pos: Vector2, map_pos: Vector3) -> bool:
 
 	Args
 		pos: position in screen buffer to draw the new voxel.
-		map_pos: position of the new block in the 3D map
+		map_pos: position of the new voxel in the 3D map
 	"""
 
-	if not $Map.is_there_block_behind(map_pos):
-		# Error out since this block doesn't exist.
-		assert("We assume we're ADDING to an existing block.")
-	if $Map.is_there_block_right(map_pos):
-		assert("No blocks allowed to the right!!")
-	if $Map.is_there_block_below(map_pos):
-		assert("No blocks allowed below!!")
+	if not $Map.is_there_voxel_behind(map_pos):
+		# Error out since this voxel doesn't exist.
+		assert("We assume we're ADDING to an existing voxel.")
+	if $Map.is_there_voxel_right(map_pos):
+		assert("No voxels allowed to the right!!")
+	if $Map.is_there_voxel_below(map_pos):
+		assert("No voxels allowed below!!")
 
 	_copy_into_screen_buffer(VOXEL_ADD_INFRONT, pos)
 
@@ -376,7 +413,7 @@ func _add_voxel_infront(pos: Vector2, map_pos: Vector3) -> bool:
 	_fix_forward_l_corner(pos, map_pos)  # Special case
 
 	# Extra special case
-	# Retain the interior lines added by a previous block's call to _fix_forward_l_corner.
+	# Retain the interior lines added by a previous voxel's call to _fix_forward_l_corner.
 	map_pos -= Vector3(0, 1, 0)
 	pos -= Vector2(1, 1)
 	_fix_forward_l_corner(pos, map_pos)
@@ -393,14 +430,14 @@ func _add_voxel_infront_and_top(pos: Vector2, map_pos: Vector3) -> bool:
 
 	Args
 		pos: position in screen buffer to draw the new voxel.
-		map_pos: position of the new block in the 3D map
+		map_pos: position of the new voxel in the 3D map
 	"""
-	if not $Map.is_there_block_behind(map_pos):
-		assert("We asssume we're ADDING an existing block!")
-	if not $Map.is_there_block_below(map_pos):
-		assert("We assume we're ADDING an existing block!")
+	if not $Map.is_there_voxel_behind(map_pos):
+		assert("We asssume we're ADDING an existing voxel!")
+	if not $Map.is_there_voxel_below(map_pos):
+		assert("We assume we're ADDING an existing voxel!")
 
-	# FIXME - maybe i should add asserts to check that there are no blocks
+	# FIXME - maybe i should add asserts to check that there are no voxels
 	# to the left, right, above and in front. I sorta want the flexibility to
 	# hack the renderer though for test cases. ehhh..
 
@@ -422,14 +459,14 @@ func _add_voxel_infront_and_left(pos: Vector2, map_pos: Vector3) -> bool:
 
 	Args
 		pos: position in screen buffer to draw the new voxel.
-		map_pos: position of the new block in the 3D map
+		map_pos: position of the new voxel in the 3D map
 	"""
-	if not $Map.is_there_block_behind(map_pos):
-		assert("We asssume we're ADDING an existing block!")
-	if not $Map.is_there_block_right(map_pos):
-		assert("We assume we're ADDING an existing block!")
+	if not $Map.is_there_voxel_behind(map_pos):
+		assert("We asssume we're ADDING an existing voxel!")
+	if not $Map.is_there_voxel_right(map_pos):
+		assert("We assume we're ADDING an existing voxel!")
 
-	# FIXME - maybe i should add asserts to check that there are no blocks
+	# FIXME - maybe i should add asserts to check that there are no voxels
 	# to the left, right, above and in front. I sorta want the flexibility to
 	# hack the renderer though for test cases. ehhh..
 
@@ -453,16 +490,16 @@ func _add_voxel_infront_and_left_top(pos: Vector2, map_pos: Vector3) -> bool:
 
 	Args
 		pos: position in screen buffer to draw the new voxel.
-		map_pos: position of the new block in the 3D map
+		map_pos: position of the new voxel in the 3D map
 	"""
-	if not $Map.is_there_block_behind(map_pos):
-		assert("We asssume we're ADDING an existing block!")
-	if not $Map.is_there_block_right(map_pos):
-		assert("We assume we're ADDING an existing block!")
-	if not $Map.is_there_block_below(map_pos):
-		assert("We assume we're ADDING an existing block!")
+	if not $Map.is_there_voxel_behind(map_pos):
+		assert("We asssume we're ADDING an existing voxel!")
+	if not $Map.is_there_voxel_right(map_pos):
+		assert("We assume we're ADDING an existing voxel!")
+	if not $Map.is_there_voxel_below(map_pos):
+		assert("We assume we're ADDING an existing voxel!")
 
-	# FIXME - maybe i should add asserts to check that there are no blocks
+	# FIXME - maybe i should add asserts to check that there are no voxels
 	# to the left, right, above and in front. I sorta want the flexibility to
 	# hack the renderer though for test cases. ehhh..
 
@@ -489,7 +526,7 @@ func _fix_vert_interior_lines(pos: Vector2, map_pos: Vector3) -> void:
 	var num_interior_vert_lines = count_z_edge(map_pos)
 
 	# Special case to round down the number of interior lines. If there's only
-	# 1 block, draw no extra interior edges.
+	# 1 voxel, draw no extra interior edges.
 	if num_interior_vert_lines == 1:
 		num_interior_vert_lines = 0
 
@@ -508,7 +545,7 @@ func _fix_horiz_interior_lines(pos: Vector2, map_pos: Vector3) -> void:
 	var num_interior_horiz_lines = count_x_edge(map_pos)
 
 	# Special case to round down the number of interior lines. If there's only
-	# 1 block, draw no extra interior edges.
+	# 1 voxel, draw no extra interior edges.
 	if num_interior_horiz_lines == 1:
 		num_interior_horiz_lines = 0
 
@@ -528,7 +565,7 @@ func _fix_diag_interior_lines(pos: Vector2, map_pos: Vector3) -> void:
 	var num_interior_diag_lines = count_y_edge(map_pos)
 
 	# Special case to round down the number of interior lines. If there's only
-	# 1 block, draw no extra interior edges.
+	# 1 voxel, draw no extra interior edges.
 	if num_interior_diag_lines <= 3:
 		num_interior_diag_lines = 0
 	else:
@@ -568,7 +605,7 @@ func _draw_new_interior_diag_lines(pos: Vector2, num_lines: int) -> void:
 #  |\___*  |
 #  \|______|
 func _fix_left_l_corner(pos: Vector2, map_pos: Vector3) -> void:
-	# If block exists (below and to the left).
+	# If voxel exists (below and to the left).
 	var temp: Vector3 = map_pos - Vector3(1, 0, 1)
 	if $Map.is_valid_pos(temp):
 		if $Map.voxel_exists_at_pos(temp):
@@ -583,8 +620,8 @@ func _fix_left_l_corner(pos: Vector2, map_pos: Vector3) -> void:
 #  ||  *___\
 #  \|______|
 func _fix_right_l_corner(pos: Vector2, map_pos: Vector3) -> void:
-	# If block does not exist to the new block's right
-	# and if a block exists below and to the right
+	# If voxel does not exist to the new voxel's right
+	# and if a voxel exists below and to the right
 	var temp: Vector3 = map_pos + Vector3(1, 0, 0)
 	var temp_2: Vector3 = map_pos + Vector3(1, 0, -1)
 	if $Map.is_valid_pos(temp) and $Map.is_valid_pos(temp_2):
@@ -605,7 +642,7 @@ func _fix_right_l_corner(pos: Vector2, map_pos: Vector3) -> void:
 #	 | *   |
 #	  \|___|
 func _fix_left_t_corner(pos: Vector2, map_pos: Vector3) -> void:
-	# If a block exists below and and to the right
+	# If a voxel exists below and and to the right
 	var temp: Vector3 = map_pos + Vector3(1, 0, -1)
 	if $Map.is_valid_pos(temp):
 		if $Map.voxel_exists_at_pos(temp):
@@ -620,7 +657,7 @@ func _fix_left_t_corner(pos: Vector2, map_pos: Vector3) -> void:
 #	\ \__\______|
 #	 \|__|
 func _fix_flat_right_t_corner(pos: Vector2, map_pos: Vector3) -> void:
-	# If a block exists behind and and to the right
+	# If a voxel exists behind and and to the right
 	var temp: Vector3 = map_pos + Vector3(1, -1, 0)
 	if $Map.is_valid_pos(temp):
 		if $Map.voxel_exists_at_pos(temp):
@@ -638,7 +675,7 @@ func _fix_flat_right_t_corner(pos: Vector2, map_pos: Vector3) -> void:
 #	|>\|___|
 #	 \|__|
 func _fix_forward_t_corner(pos: Vector2, map_pos: Vector3) -> void:
-	# If a block exists behind and and below
+	# If a voxel exists behind and and below
 	var temp: Vector3 = map_pos + Vector3(0, -1, -1)
 	if $Map.is_valid_pos(temp):
 		if $Map.voxel_exists_at_pos(temp):
@@ -658,7 +695,7 @@ func _fix_forward_t_corner(pos: Vector2, map_pos: Vector3) -> void:
 #	\ \___\
 #	 \|___|
 func _fix_forward_l_corner(pos: Vector2, map_pos: Vector3) -> void:
-	# If there is a block behind and above...
+	# If there is a voxel behind and above...
 	var temp: Vector3 = map_pos + Vector3(0, -1, 1)
 	if $Map.is_valid_pos(temp):
 		if $Map.voxel_exists_at_pos(temp):
@@ -677,10 +714,10 @@ func _fix_forward_l_corner(pos: Vector2, map_pos: Vector3) -> void:
 #	 __|_*  \
 #	|\_x_____\
 #	\|_______|
-# x is current block
+# x is current voxel
 # * is the edge we're fixing
 func _fix_flat_left_l_corner(pos: Vector2, map_pos: Vector3) -> void:
-	# If there is a block behind and to the right...
+	# If there is a voxel behind and to the right...
 	var temp: Vector3 = map_pos + Vector3(1, -1, 0)
 	if $Map.is_valid_pos(temp):
 		if $Map.voxel_exists_at_pos(temp):
@@ -699,11 +736,11 @@ func _fix_flat_left_l_corner(pos: Vector2, map_pos: Vector3) -> void:
 #	    \ \_______\
 #	     \|_______|
 func _fix_flat_right_l_corner(pos: Vector2, map_pos: Vector3) -> void:
-	# If there is a block behind and not a block behindand to the right...
+	# If there is a voxel behind and not a voxel behindand to the right...
 	var temp: Vector3 = map_pos + Vector3(1, -1, 0)
 	if $Map.is_valid_pos(temp):
 		if not $Map.voxel_exists_at_pos(temp) and \
-			$Map.is_there_block_behind(map_pos):
+			$Map.is_there_voxel_behind(map_pos):
 			var offset_pos_to_interior_line: Vector2 = Vector2(3, 0)  # Constant
 			var screen_pos = pos + offset_pos_to_interior_line
 			var num_interior_diag_lines = count_inner_y_edge(map_pos + Vector3(0, -1, 0))
@@ -721,7 +758,7 @@ func _fix_flat_right_l_corner(pos: Vector2, map_pos: Vector3) -> void:
 #	||  |
 #	\|__|
 func _fix_right_t_corner(pos: Vector2, map_pos: Vector3) -> void:
-	# If there is not a block below and to the right.
+	# If there is not a voxel below and to the right.
 	var temp: Vector3 = map_pos + Vector3(1, 0, -1)
 	if $Map.is_valid_pos(temp):
 		if not $Map.voxel_exists_at_pos(temp):
@@ -736,11 +773,11 @@ func _fix_right_t_corner(pos: Vector2, map_pos: Vector3) -> void:
 #	 \ |  |
 # 	  \|__|
 func _fix_backwards_l_corner(pos: Vector2, map_pos: Vector3) -> void:
-	# If there is not a block behind and there is a block behind and below...
+	# If there is not a voxel behind and there is a voxel behind and below...
 	var temp: Vector3 = map_pos + Vector3(0, -1, -1)
 	if $Map.is_valid_pos(temp):
 		if $Map.voxel_exists_at_pos(temp) and \
-			not $Map.is_there_block_behind(map_pos):
+			not $Map.is_there_voxel_behind(map_pos):
 			var offset_pos_to_interior_line: Vector2 = Vector2(-1, 2)  # Constant
 			var screen_pos = pos + offset_pos_to_interior_line
 			var num_interior_diag_lines = count_y_edge(temp) - 1
@@ -759,7 +796,7 @@ func _fix_backwards_l_corner(pos: Vector2, map_pos: Vector3) -> void:
 #	 \|__|
 # add to cases where we're adding top and in front (2 cases)
 func _fix_backwards_t_corner(pos: Vector2, map_pos: Vector3) -> void:
-	# If there is not a block behind and below...
+	# If there is not a voxel behind and below...
 	var temp: Vector3 = map_pos + Vector3(0, -1, -1)
 	if $Map.is_valid_pos(temp):
 		if not $Map.voxel_exists_at_pos(temp):
@@ -797,8 +834,8 @@ func _fix_backwards_t_corner(pos: Vector2, map_pos: Vector3) -> void:
 
 func count_y_edge(map_pos: Vector3) -> int:
 	"""
-	Returns the number of continous blocks in the y direction starting at
-	map_pos. This function assumes there are no blocks in FRONT of map_pos.
+	Returns the number of continous voxels in the y direction starting at
+	map_pos. This function assumes there are no voxels in FRONT of map_pos.
 	Notes: y defined the back to front dimension.
 	"""
 	var edge_len = 0
@@ -808,8 +845,8 @@ func count_y_edge(map_pos: Vector3) -> int:
 		if not $Map.voxel_exists_at_pos(cur_pos):
 			break
 
-		found_new_plane = found_new_plane or $Map.is_there_block_above(cur_pos)
-		found_new_plane = found_new_plane or $Map.is_there_block_left(cur_pos)
+		found_new_plane = found_new_plane or $Map.is_there_voxel_above(cur_pos)
+		found_new_plane = found_new_plane or $Map.is_there_voxel_left(cur_pos)
 		if found_new_plane:
 			break
 		else:
@@ -824,8 +861,8 @@ func count_y_edge(map_pos: Vector3) -> int:
 
 func count_inner_y_edge(map_pos: Vector3) -> int:
 	"""
-	Returns the number of continous blocks in the y direction starting at
-	map_pos. This function assumes there are no blocks in FRONT of map_pos.
+	Returns the number of continous voxels in the y direction starting at
+	map_pos. This function assumes there are no voxels in FRONT of map_pos.
 	The inner edge is defined as the edge further away from the camera.
 	Notes: y defined the back to front dimension.
 	"""
@@ -836,8 +873,8 @@ func count_inner_y_edge(map_pos: Vector3) -> int:
 		if not $Map.voxel_exists_at_pos(cur_pos):
 			break
 
-		found_new_plane = found_new_plane or $Map.is_there_block_above(cur_pos)
-		found_new_plane = found_new_plane or $Map.is_there_block_right(cur_pos)
+		found_new_plane = found_new_plane or $Map.is_there_voxel_above(cur_pos)
+		found_new_plane = found_new_plane or $Map.is_there_voxel_right(cur_pos)
 		if found_new_plane:
 			break
 		else:
@@ -853,8 +890,8 @@ func count_inner_y_edge(map_pos: Vector3) -> int:
 
 func count_x_edge(map_pos: Vector3) -> int:
 	"""
-	Returns the number of continous blocks in the x direction starting at
-	map_pos. This function assumes there are no blocks to the left of map_pos.
+	Returns the number of continous voxels in the x direction starting at
+	map_pos. This function assumes there are no voxels to the left of map_pos.
 	Notes: x defined the left to right dimension.
 	"""
 	var edge_len = 0
@@ -864,8 +901,8 @@ func count_x_edge(map_pos: Vector3) -> int:
 		if not $Map.voxel_exists_at_pos(cur_pos):
 			break
 
-		found_new_plane = found_new_plane or $Map.is_there_block_above(cur_pos)
-		found_new_plane = found_new_plane or $Map.is_there_block_infront(cur_pos)
+		found_new_plane = found_new_plane or $Map.is_there_voxel_above(cur_pos)
+		found_new_plane = found_new_plane or $Map.is_there_voxel_infront(cur_pos)
 		if found_new_plane:
 			break
 		else:
@@ -880,8 +917,8 @@ func count_x_edge(map_pos: Vector3) -> int:
 
 func count_z_edge(map_pos: Vector3) -> int:
 	"""
-	Returns the number of continous blocks in the z direction starting at
-	map_pos. This function assumes there are no blocks above map_pos.
+	Returns the number of continous voxels in the z direction starting at
+	map_pos. This function assumes there are no voxels above map_pos.
 	Notes: z defined the up to down dimension.
 	"""
 	var edge_len = 0
@@ -891,8 +928,8 @@ func count_z_edge(map_pos: Vector3) -> int:
 		if not $Map.voxel_exists_at_pos(cur_pos):
 			break
 
-		found_new_plane = found_new_plane or $Map.is_there_block_left(cur_pos)
-		found_new_plane = found_new_plane or $Map.is_there_block_infront(cur_pos)
+		found_new_plane = found_new_plane or $Map.is_there_voxel_left(cur_pos)
+		found_new_plane = found_new_plane or $Map.is_there_voxel_infront(cur_pos)
 		if found_new_plane:
 			break
 		else:
@@ -903,6 +940,21 @@ func count_z_edge(map_pos: Vector3) -> int:
 			break
 
 	return edge_len
+
+
+func color_voxel(pos: Vector2, map_pos: Vector3) -> void:
+	var type: int = $Map.get_voxel_type(map_pos)
+
+	# If the pattern if null, skip the rest of this function!
+	if voxel_pattern_dict[str(type)] == null:
+		return
+
+	var pattern: String = voxel_pattern_dict[str(type)]
+	var offset_to_front_face = Vector2(2, 2)  # Constant
+	for y in range(VOXEL_HEIGHT):
+		for x in range(VOXEL_WIDTH):
+			var cur_pos = pos + offset_to_front_face + Vector2(x, y)
+			screen_buffer[cur_pos.y][cur_pos.x] = pattern
 
 
 func draw_map(map: Array, bottom_right_voxel_screen_pos: Vector2) -> bool:
@@ -923,28 +975,28 @@ func draw_map(map: Array, bottom_right_voxel_screen_pos: Vector2) -> bool:
 			for x in range($Map.get_map_len_x() - 1, -1, -1):
 				var map_pos: Vector3 = Vector3(x, y, z)
 				if $Map.voxel_exists_at_pos(map_pos):
-					if not $Map.is_there_block_behind(map_pos):
-						if not $Map.is_there_block_right(map_pos) and \
-							not $Map.is_there_block_below(map_pos):
+					if not $Map.is_there_voxel_behind(map_pos):
+						if not $Map.is_there_voxel_right(map_pos) and \
+							not $Map.is_there_voxel_below(map_pos):
 							draw_1x1_voxel(cur_pos)
-						elif not $Map.is_there_block_right(map_pos) and \
-							$Map.is_there_block_below(map_pos):
+						elif not $Map.is_there_voxel_right(map_pos) and \
+							$Map.is_there_voxel_below(map_pos):
 							_add_voxel_top(cur_pos, map_pos)
-						elif $Map.is_there_block_right(map_pos) and \
-							not $Map.is_there_block_below(map_pos):
+						elif $Map.is_there_voxel_right(map_pos) and \
+							not $Map.is_there_voxel_below(map_pos):
 							_add_voxel_left(cur_pos, map_pos)
 						else:
 							_add_voxel_top_left(cur_pos, map_pos)
 					else:
 						# Draw y dimension stuff!
-						if not $Map.is_there_block_right(map_pos) and \
-							not $Map.is_there_block_below(map_pos):
+						if not $Map.is_there_voxel_right(map_pos) and \
+							not $Map.is_there_voxel_below(map_pos):
 							_add_voxel_infront(cur_pos, map_pos)
-						elif not $Map.is_there_block_right(map_pos) and \
-							$Map.is_there_block_below(map_pos):
+						elif not $Map.is_there_voxel_right(map_pos) and \
+							$Map.is_there_voxel_below(map_pos):
 							_add_voxel_infront_and_top(cur_pos, map_pos)
-						elif $Map.is_there_block_right(map_pos) and \
-							not $Map.is_there_block_below(map_pos):
+						elif $Map.is_there_voxel_right(map_pos) and \
+							not $Map.is_there_voxel_below(map_pos):
 							_add_voxel_infront_and_left(cur_pos, map_pos)
 						else:
 							_add_voxel_infront_and_left_top(cur_pos, map_pos)
@@ -952,5 +1004,30 @@ func draw_map(map: Array, bottom_right_voxel_screen_pos: Vector2) -> bool:
 				cur_pos.x -= VOXEL_WIDTH
 			cur_pos.y -= VOXEL_HEIGHT
 
+
+	# Separate pass to do coloring. Doing it this way because of edge case 2
+	# seen under res://edge_cases/case_2.png
+	# This way isn't the most efficient. Ideally should combine both for loops.
+	# Traverse back to front
+	for y in range($Map.get_map_len_y()):
+		cur_pos.y = bottom_right_voxel_screen_pos.y + y
+		cur_pos.x = bottom_right_voxel_screen_pos.x + y
+		var original_x = cur_pos.x
+		# Traverse bottom to top
+		for z in range($Map.get_map_len_z()):
+			cur_pos.x = original_x
+			# Traverse from right to left
+			for x in range($Map.get_map_len_x() - 1, -1, -1):
+				var map_pos: Vector3 = Vector3(x, y, z)
+				if $Map.voxel_exists_at_pos(map_pos):
+					color_voxel(cur_pos, map_pos)
+				cur_pos.x -= VOXEL_WIDTH
+			cur_pos.y -= VOXEL_HEIGHT
+
 	return true
+
+
+func _on_Map_new_map_loaded():
+	# Assign voxel type to dither pattern
+	assign_voxel_to_pattern()
 
