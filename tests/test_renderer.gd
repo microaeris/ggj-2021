@@ -3,6 +3,7 @@ extends Control
 ## Locals
 
 # Add new test functions to this array
+# I sit here.
 var test_bench = [
 	"_test_is_there",
 	"_test_is_valid_map_pos",
@@ -18,6 +19,8 @@ var test_bench = [
 	"_test_draw_donut",
 	"_test_draw_heart",
 	"_test_draw_diag",
+	"_test_voxel_map_space_to_screen_space",
+	"_test_draw_level_1",
 ]
 
 ## Builtin Callbacks
@@ -25,6 +28,7 @@ var test_bench = [
 func _ready():
 	for test in test_bench:
 		assert(call(test), "Test failed: " + test)
+	print("All tests passed.")
 
 ##
 
@@ -586,20 +590,14 @@ func _test_draw_donut() -> bool:
 	]
 	$Renderer/Map.set_map(map)
 
-	var expected_screen_hash: String = "0b9bf2a8665da9c3e5bfea0e7ddd90d607e07006"
+	var expected_screen_hash: String = "ae3ca1e382996db3d6c3f4f355e7fa8be7bd7a74"
 
-	var pos: Vector2 = Vector2(35, 20)
 	$Renderer.clear_screen_buffer()
-	$Renderer.draw_map(map, pos)
+	$Renderer.draw_map()
 
 	var resulting_hash: String = $Renderer.hash_screen_buffer()
 	assert(expected_screen_hash == resulting_hash, "Expected: " + expected_screen_hash + ". Actual: " + resulting_hash)
-
-	# var pos: Vector2 = Vector2(35, 20)
-	# clear_screen_buffer()
-	# draw_map(map, pos)
-	# print(hash_screen_buffer())
-	# update_screen()
+	# $Renderer.update_screen()
 
 	return true
 
@@ -621,14 +619,14 @@ func _test_draw_heart() -> bool:
 	]
 	$Renderer/Map.set_map(map)
 
-	var expected_screen_hash: String = "5676ffe20061d8b1ce45eb6a9400e3675d72d8fa"
+	var expected_screen_hash: String = "a958304aa0e2c90a62c0dea4cb613c1bd2fa1e63"
 
-	var pos: Vector2 = Vector2(35, 20)
 	$Renderer.clear_screen_buffer()
-	$Renderer.draw_map(map, pos)
+	$Renderer.draw_map()
 
 	var resulting_hash: String = $Renderer.hash_screen_buffer()
 	assert(expected_screen_hash == resulting_hash, "Expected: " + expected_screen_hash + ". Actual: " + resulting_hash)
+	# $Renderer.update_screen()
 
 	return true
 
@@ -692,4 +690,24 @@ func _test_draw_diag() -> bool:
 	resulting_hash = $Renderer.hash_screen_buffer()
 	assert(expected_screen_hash == resulting_hash, "Expected: " + expected_screen_hash + ". Actual: " + resulting_hash)
 
+	return true
+
+
+func _test_voxel_map_space_to_screen_space() -> bool:
+	var map_name = "TestMap1.map"
+	$Renderer/Map.load_map(map_name)
+	$Renderer.clear_screen_buffer()
+	$Renderer.set_camera_center(Vector3(1, 0, 0))
+	var res_pos: Vector2 = $Renderer.voxel_map_space_to_screen_space(Vector3(0, 0, 0))
+	assert(res_pos == Vector2(15, 10))  # I'm not 100% sure this is the right value....
+	return true
+
+
+func _test_draw_level_1() -> bool:
+	var map_name = "TestMap1.map"
+	$Renderer/Map.load_map(map_name)
+	$Renderer.clear_screen_buffer()
+	$Renderer.set_camera_center($Renderer/Map.get_center_pos())
+	$Renderer.draw_map()
+	$Renderer.update_screen()
 	return true

@@ -125,7 +125,7 @@ var voxel_dither_patterns: Array = [
 	CHAR_HALF_DITHER,
 ]
 # The voxel that is in the center of the screen
-var camera_center_voxel_map_coords: Vector3 = Vector3(0,0,0)
+var _camera_center_voxel_map_coords: Vector3 = Vector3(0,0,0)
 
 # Coordinate system
 #	z - column
@@ -167,15 +167,40 @@ func _ready():
 
 ##
 
+func set_camera_center(pos: Vector3) -> void:
+	assert($Map.is_valid_pos(pos))
+	_camera_center_voxel_map_coords = pos
+
+
+func get_camera_center(pos: Vector3) -> Vector3:
+	return _camera_center_voxel_map_coords
+
+
 func assign_voxel_to_pattern() -> void:
 	# Choose colors for Jordan's voxels
 	var unique_voxel_arr: Array = $Map.get_unique_numbers_in_map()
 	assert(unique_voxel_arr.size() < 4, "Jordan, you're using too many colors!!")
 
+	voxel_pattern_dict.clear()
 	var i: int = 0
 	for voxel_num in unique_voxel_arr:
 		voxel_pattern_dict[str(voxel_num)] = voxel_dither_patterns[i]
 		i += 1
+
+
+func get_screen_buffer(pos: Vector2) -> String:
+	if is_valid_screen_space_pos(pos):
+		return screen_buffer[pos.y][pos.x]
+	else:
+		return "BAD BAD"
+
+
+func set_screen_buffer(pos: Vector2, value: String) -> void:
+	"""
+	Wrapper for writing to the screen buffer. Any attempts to write to an out of bounds address is ignored!
+	"""
+	if is_valid_screen_space_pos(pos):
+		screen_buffer[pos.y][pos.x] = value
 
 
 func clear_screen_buffer() -> void:
@@ -404,8 +429,10 @@ func _add_voxel_infront(pos: Vector2, map_pos: Vector3) -> bool:
 	_copy_into_screen_buffer(VOXEL_ADD_INFRONT, pos)
 
 	## Extra special case!
-	if screen_buffer[pos.y][pos.x] == CHAR_DIAG:
-		screen_buffer[pos.y][pos.x] = " "
+	if get_screen_buffer(pos) == CHAR_DIAG:
+		set_screen_buffer(pos, " ")
+	# if screen_buffer[pos.y][pos.x] == CHAR_DIAG:
+	# 	screen_buffer[pos.y][pos.x] = " "
 
 	_fix_diag_interior_lines(pos, map_pos)
 	_fix_flat_right_t_corner(pos, map_pos)  # Special case
@@ -518,8 +545,11 @@ func _fix_vert_interior_lines(pos: Vector2, map_pos: Vector3) -> void:
 	# Erase vertical interior lines
 	var offset_pos_to_old_interior_vert_line: Vector2 = Vector2(2, 6)  # Constant
 	var screen_pos: Vector2 = pos + offset_pos_to_old_interior_vert_line
-	while (screen_buffer[screen_pos.y][screen_pos.x] == CHAR_LEFT_BAR):
-		screen_buffer[screen_pos.y][screen_pos.x] = " "
+	# while (screen_buffer[screen_pos.y][screen_pos.x] == CHAR_LEFT_BAR):
+	# 	screen_buffer[screen_pos.y][screen_pos.x] = " "
+	# 	screen_pos.y += 1
+	while (get_screen_buffer(screen_pos) == CHAR_LEFT_BAR):
+		set_screen_buffer(screen_pos, " ")
 		screen_pos.y += 1
 
 	# Draw new interior lines.
@@ -537,8 +567,11 @@ func _fix_horiz_interior_lines(pos: Vector2, map_pos: Vector3) -> void:
 	# Erase horizontal interior lines
 	var offset_pos_to_old_interior_horiz_line: Vector2 = Vector2(6, 2)  # Constant
 	var screen_pos: Vector2 = pos + offset_pos_to_old_interior_horiz_line
-	while (screen_buffer[screen_pos.y][screen_pos.x] == CHAR_TOP_BAR):
-		screen_buffer[screen_pos.y][screen_pos.x] = " "
+	# while (screen_buffer[screen_pos.y][screen_pos.x] == CHAR_TOP_BAR):
+	# 	screen_buffer[screen_pos.y][screen_pos.x] = " "
+	# 	screen_pos.x += 1
+	while (get_screen_buffer(screen_pos) == CHAR_TOP_BAR):
+		set_screen_buffer(screen_pos, " ")
 		screen_pos.x += 1
 
 	# Draw new interior lines.
@@ -556,8 +589,12 @@ func _fix_diag_interior_lines(pos: Vector2, map_pos: Vector3) -> void:
 	# Erase diag interior lines
 	var offset_pos_to_old_interior_diag_line: Vector2 = Vector2(2, 2)  # Constant
 	var screen_pos: Vector2 = pos + offset_pos_to_old_interior_diag_line
-	while (screen_buffer[screen_pos.y][screen_pos.x] == CHAR_DIAG):
-		screen_buffer[screen_pos.y][screen_pos.x] = " "
+	# while (screen_buffer[screen_pos.y][screen_pos.x] == CHAR_DIAG):
+	# 	screen_buffer[screen_pos.y][screen_pos.x] = " "
+	# 	screen_pos.y -= 1
+	# 	screen_pos.x -= 1
+	while (get_screen_buffer(screen_pos) == CHAR_DIAG):
+		set_screen_buffer(screen_pos, " ")
 		screen_pos.y -= 1
 		screen_pos.x -= 1
 
@@ -578,7 +615,8 @@ func _draw_new_interior_horiz_lines(pos: Vector2, num_lines: int) -> void:
 	var offset_pos_to_interior_horiz_line: Vector2 = Vector2(3, 2)  # Constant
 	var screen_pos = pos + offset_pos_to_interior_horiz_line
 	for i in range(num_lines):
-		screen_buffer[screen_pos.y][screen_pos.x] = CHAR_TOP_BAR
+		# screen_buffer[screen_pos.y][screen_pos.x] = CHAR_TOP_BAR
+		set_screen_buffer(screen_pos, CHAR_TOP_BAR)
 		screen_pos.x += 1
 
 
@@ -586,7 +624,8 @@ func _draw_new_interior_vert_lines(pos: Vector2, num_lines: int) -> void:
 	var offset_pos_to_interior_vert_line: Vector2 = Vector2(2, 3)  # Constant
 	var screen_pos = pos + offset_pos_to_interior_vert_line
 	for i in range(num_lines):
-		screen_buffer[screen_pos.y][screen_pos.x] = CHAR_LEFT_BAR
+		# screen_buffer[screen_pos.y][screen_pos.x] = CHAR_LEFT_BAR
+		set_screen_buffer(screen_pos, CHAR_LEFT_BAR)
 		screen_pos.y += 1
 
 
@@ -594,7 +633,8 @@ func _draw_new_interior_diag_lines(pos: Vector2, num_lines: int) -> void:
 	var offset_pos_to_interior_vert_line: Vector2 = Vector2(1, 1)  # Constant
 	var screen_pos = pos + offset_pos_to_interior_vert_line
 	for i in range(num_lines):
-		screen_buffer[screen_pos.y][screen_pos.x] = CHAR_DIAG
+		# screen_buffer[screen_pos.y][screen_pos.x] = CHAR_DIAG
+		set_screen_buffer(screen_pos, CHAR_DIAG)
 		screen_pos.y -= 1
 		screen_pos.x -= 1
 
@@ -665,7 +705,8 @@ func _fix_flat_right_t_corner(pos: Vector2, map_pos: Vector3) -> void:
 			var screen_pos = pos + offset_pos_to_interior_line
 			var num_interior_vert_lines = count_x_edge(temp)
 			for i in range(num_interior_vert_lines):
-				screen_buffer[screen_pos.y][screen_pos.x] = CHAR_TOP_BAR
+				# screen_buffer[screen_pos.y][screen_pos.x] = CHAR_TOP_BAR
+				set_screen_buffer(screen_pos, CHAR_TOP_BAR)
 				screen_pos.x += 1
 
 
@@ -684,7 +725,8 @@ func _fix_forward_t_corner(pos: Vector2, map_pos: Vector3) -> void:
 			var num_interior_vert_lines = count_z_edge(temp)
 			# Draw in new interior lines
 			for i in range(num_interior_vert_lines):
-				screen_buffer[screen_pos.y][screen_pos.x] = CHAR_RIGHT_BAR
+				# screen_buffer[screen_pos.y][screen_pos.x] = CHAR_RIGHT_BAR
+				set_screen_buffer(screen_pos, CHAR_RIGHT_BAR)
 				screen_pos.y += 1
 
 
@@ -706,6 +748,7 @@ func _fix_forward_l_corner(pos: Vector2, map_pos: Vector3) -> void:
 			# Draw in new interior lines
 			for i in range(num_interior_horiz_lines):
 				screen_buffer[screen_pos.y][screen_pos.x] = CHAR_TOP_BAR
+				set_screen_buffer(screen_pos, CHAR_TOP_BAR)
 				screen_pos.x += 1
 
 
@@ -726,7 +769,8 @@ func _fix_flat_left_l_corner(pos: Vector2, map_pos: Vector3) -> void:
 			var num_interior_diag_lines = count_y_edge(temp)
 			# Draw in new interior lines
 			for i in range(num_interior_diag_lines):
-				screen_buffer[screen_pos.y][screen_pos.x] = CHAR_DIAG
+				# screen_buffer[screen_pos.y][screen_pos.x] = CHAR_DIAG
+				set_screen_buffer(screen_pos, CHAR_DIAG)
 				screen_pos.x -= 1
 				screen_pos.y -= 1
 
@@ -746,7 +790,8 @@ func _fix_flat_right_l_corner(pos: Vector2, map_pos: Vector3) -> void:
 			var num_interior_diag_lines = count_inner_y_edge(map_pos + Vector3(0, -1, 0))
 			# Draw in new interior lines
 			for i in range(num_interior_diag_lines):
-				screen_buffer[screen_pos.y][screen_pos.x] = CHAR_DIAG
+				# screen_buffer[screen_pos.y][screen_pos.x] = CHAR_DIAG
+				set_screen_buffer(screen_pos, CHAR_DIAG)
 				screen_pos.x -= 1
 				screen_pos.y -= 1
 
@@ -764,7 +809,8 @@ func _fix_right_t_corner(pos: Vector2, map_pos: Vector3) -> void:
 		if not $Map.voxel_exists_at_pos(temp):
 			var offset_pos_to_interior_line: Vector2 = Vector2(4, 5)  # Constant
 			var screen_pos = pos + offset_pos_to_interior_line
-			screen_buffer[screen_pos.y][screen_pos.x] = CHAR_RIGHT_BAR
+			# screen_buffer[screen_pos.y][screen_pos.x] = CHAR_RIGHT_BAR
+			set_screen_buffer(screen_pos, CHAR_RIGHT_BAR)
 
 
 #	   ___
@@ -784,7 +830,8 @@ func _fix_backwards_l_corner(pos: Vector2, map_pos: Vector3) -> void:
 			if num_interior_diag_lines > 0:
 				# Draw in new interior lines
 				for i in range(num_interior_diag_lines):
-					screen_buffer[screen_pos.y][screen_pos.x] = CHAR_DIAG
+					# screen_buffer[screen_pos.y][screen_pos.x] = CHAR_DIAG
+					set_screen_buffer(screen_pos, CHAR_DIAG)
 					screen_pos.x -= 1
 					screen_pos.y -= 1
 
@@ -813,14 +860,16 @@ func _fix_backwards_t_corner(pos: Vector2, map_pos: Vector3) -> void:
 			# Just draw two small lines manually lol
 			var offset_pos_to_interior_line: Vector2 = Vector2(0, 3)  # Constant
 			var screen_pos = pos + offset_pos_to_interior_line
-			screen_buffer[screen_pos.y][screen_pos.x] = CHAR_DIAG
+			# screen_buffer[screen_pos.y][screen_pos.x] = CHAR_DIAG
+			set_screen_buffer(screen_pos, CHAR_DIAG)
 
 			var temp_2: Vector3 = map_pos + Vector3(0, 0, -1)
 			var num_interior_vert_lines: int = count_z_edge(temp_2) - 1
 			offset_pos_to_interior_line = Vector2(0, 4)
 			screen_pos = pos + offset_pos_to_interior_line
 			for i in range(num_interior_vert_lines):
-				screen_buffer[screen_pos.y][screen_pos.x] = CHAR_RIGHT_BAR
+				# screen_buffer[screen_pos.y][screen_pos.x] = CHAR_RIGHT_BAR
+				set_screen_buffer(screen_pos, CHAR_RIGHT_BAR)
 				screen_pos.y += 1
 
 
@@ -942,6 +991,39 @@ func count_z_edge(map_pos: Vector3) -> int:
 	return edge_len
 
 
+func is_valid_screen_space_pos(pos: Vector2) -> bool:
+	return (pos.x > 0) and (pos.x < SCREEN_CHAR_WIDTH) and \
+		(pos.y > 0) and (pos.y < SCREEN_CHAR_HEIGHT)
+
+
+# Hard boi
+func voxel_map_space_to_screen_space(pos: Vector3) -> Vector2:
+	"""
+	Calculate the screen coord from the voxel map coord. Should represent the
+	top left of the voxel. If the voxel is off the screen, this function will
+	return negative values in the vector.
+	"""
+	assert($Map.is_valid_pos(pos))
+	var screen_center: Vector2 = Vector2(SCREEN_CHAR_WIDTH / 2, SCREEN_CHAR_HEIGHT / 2)
+	# This is where _camera_center_voxel_map_coords goes!
+	var top_left_of_camera_center_voxel: Vector2 = screen_center + Vector2(-2, -2)
+
+	var dist_between_voxel_and_camera_center_voxel = pos - _camera_center_voxel_map_coords
+
+	# Calculate if the voxel fits on the screen.
+	var screen_space_dist_x: int = dist_between_voxel_and_camera_center_voxel.x * VOXEL_WIDTH
+	var screen_space_dist_y: int = dist_between_voxel_and_camera_center_voxel.z * -VOXEL_HEIGHT
+	screen_space_dist_x += dist_between_voxel_and_camera_center_voxel.y
+	screen_space_dist_y += dist_between_voxel_and_camera_center_voxel.y
+
+	var voxel_screen_space_pos: Vector2 = top_left_of_camera_center_voxel + \
+		Vector2(screen_space_dist_x, screen_space_dist_y)
+	if is_valid_screen_space_pos(voxel_screen_space_pos):
+		return voxel_screen_space_pos
+	else:
+		return Vector2(-1, -1)
+
+
 func color_voxel(pos: Vector2, map_pos: Vector3) -> void:
 	var type: int = $Map.get_voxel_type(map_pos)
 
@@ -954,27 +1036,35 @@ func color_voxel(pos: Vector2, map_pos: Vector3) -> void:
 	for y in range(VOXEL_HEIGHT):
 		for x in range(VOXEL_WIDTH):
 			var cur_pos = pos + offset_to_front_face + Vector2(x, y)
-			screen_buffer[cur_pos.y][cur_pos.x] = pattern
+			# screen_buffer[cur_pos.y][cur_pos.x] = pattern
+			set_screen_buffer(cur_pos, pattern)
 
 
-func draw_map(map: Array, bottom_right_voxel_screen_pos: Vector2) -> bool:
+func draw_map() -> bool:
 	"""
 	Draws the entire map to the screen.
 	"""
-	var cur_pos: Vector2 = bottom_right_voxel_screen_pos # back most row.
+	# # This is the back most voxel that fits on the screen! It may not be
+	# # rendered in the end bc it was erase by a block in front of it,
+	# # but it would be rendered at some point!!!
+	# var bottom_right_voxel: Vector3 = ???
+	# var bottom_right_voxel_screen_pos: Vector2 = voxel_map_space_to_screen_space(bottom_right_voxel)
+	# var cur_pos: Vector2 = bottom_right_voxel_screen_pos
 
 	# Traverse back to front
 	for y in range($Map.get_map_len_y()):
-		cur_pos.y = bottom_right_voxel_screen_pos.y + y
-		cur_pos.x = bottom_right_voxel_screen_pos.x + y
-		var original_x = cur_pos.x
+		# cur_pos.y = bottom_right_voxel_screen_pos.y + y
+		# cur_pos.x = bottom_right_voxel_screen_pos.x + y
+		# var original_x = cur_pos.x
 		# Traverse bottom to top
 		for z in range($Map.get_map_len_z()):
-			cur_pos.x = original_x
+			# cur_pos.x = original_x
 			# Traverse from right to left
 			for x in range($Map.get_map_len_x() - 1, -1, -1):
 				var map_pos: Vector3 = Vector3(x, y, z)
+				var cur_pos: Vector2 = voxel_map_space_to_screen_space(map_pos)
 				if $Map.voxel_exists_at_pos(map_pos):
+
 					if not $Map.is_there_voxel_behind(map_pos):
 						if not $Map.is_there_voxel_right(map_pos) and \
 							not $Map.is_there_voxel_below(map_pos):
@@ -1001,8 +1091,8 @@ func draw_map(map: Array, bottom_right_voxel_screen_pos: Vector2) -> bool:
 						else:
 							_add_voxel_infront_and_left_top(cur_pos, map_pos)
 
-				cur_pos.x -= VOXEL_WIDTH
-			cur_pos.y -= VOXEL_HEIGHT
+			# 	cur_pos.x -= VOXEL_WIDTH
+			# cur_pos.y -= VOXEL_HEIGHT
 
 
 	# Separate pass to do coloring. Doing it this way because of edge case 2
@@ -1010,19 +1100,20 @@ func draw_map(map: Array, bottom_right_voxel_screen_pos: Vector2) -> bool:
 	# This way isn't the most efficient. Ideally should combine both for loops.
 	# Traverse back to front
 	for y in range($Map.get_map_len_y()):
-		cur_pos.y = bottom_right_voxel_screen_pos.y + y
-		cur_pos.x = bottom_right_voxel_screen_pos.x + y
-		var original_x = cur_pos.x
+		# cur_pos.y = bottom_right_voxel_screen_pos.y + y
+		# cur_pos.x = bottom_right_voxel_screen_pos.x + y
+		# var original_x = cur_pos.x
 		# Traverse bottom to top
 		for z in range($Map.get_map_len_z()):
-			cur_pos.x = original_x
+			# cur_pos.x = original_x
 			# Traverse from right to left
 			for x in range($Map.get_map_len_x() - 1, -1, -1):
 				var map_pos: Vector3 = Vector3(x, y, z)
+				var cur_pos: Vector2 = voxel_map_space_to_screen_space(map_pos)
 				if $Map.voxel_exists_at_pos(map_pos):
 					color_voxel(cur_pos, map_pos)
-				cur_pos.x -= VOXEL_WIDTH
-			cur_pos.y -= VOXEL_HEIGHT
+			# 	cur_pos.x -= VOXEL_WIDTH
+			# cur_pos.y -= VOXEL_HEIGHT
 
 	return true
 
@@ -1031,3 +1122,5 @@ func _on_Map_new_map_loaded():
 	# Assign voxel type to dither pattern
 	assign_voxel_to_pattern()
 
+	# Choose a default center
+	set_camera_center($Map.get_center_pos())

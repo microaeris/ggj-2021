@@ -306,8 +306,11 @@ func load_map(map_name):
 	else:
 		print("Unsupported map")
 
+
 func set_map(map_arr):
 	map = map_arr
+	emit_signal("new_map_loaded")
+
 
 func is_there_voxel_above(pos: Vector3) -> bool:
 	if (pos.z + 1) >= len(map):
@@ -371,6 +374,13 @@ func get_map_len_y() -> int:
 
 func get_map_len_x() -> int:
 	return len(map[0][0])
+
+
+func get_center_pos() -> Vector3:
+	var y = get_map_len_y()
+	var x = get_map_len_x()
+	var z = get_map_len_z()
+	return Vector3(x / 2, y / 2, z / 2)
 
 
 func get_unique_numbers_in_map() -> Array:
