@@ -11,5 +11,12 @@ func _ready():
 	print($Renderer.hash_screen_buffer())
 	$Renderer.update_screen()
 
+func _input(event):
+	if event.is_action_pressed("ui_accept"):
+		$Player.show()
+		$Renderer.show()
+		$HUD.show()
+		$TitleScreen.hide()
+
 ##
 
