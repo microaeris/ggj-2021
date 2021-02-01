@@ -361,7 +361,9 @@ func is_valid_pos(pos: Vector3) -> bool:
 
 
 func voxel_exists_at_pos(pos: Vector3) -> bool:
-	return map[pos.z][pos.y][pos.x] > 0
+	if is_valid_pos(pos):
+		return map[pos.z][pos.y][pos.x] > 0
+	return false
 
 
 func get_map_len_z() -> int:

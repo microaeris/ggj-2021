@@ -35,7 +35,6 @@ __meta__ = {
 }
 
 [node name="Player" type="Control" parent="."]
-visible = false
 margin_right = 40.0
 margin_bottom = 40.0
 script = ExtResource( 4 )
@@ -44,36 +43,17 @@ __meta__ = {
 }
 
 [node name="Renderer" parent="." instance=ExtResource( 2 )]
-visible = false
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -232.978
-margin_top = -147.673
-margin_right = 279.022
-margin_bottom = 194.327
-
-[node name="HUD" type="RichTextLabel" parent="."]
-visible = false
-margin_left = 18.8619
-margin_top = 14.7358
-margin_right = 116.862
-margin_bottom = 25.7358
-__meta__ = {
-"_edit_group_": true,
-"_edit_use_anchors_": false
-}
-
-[node name="Background" type="ColorRect" parent="HUD"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-color = Color( 0.133333, 0.137255, 0.137255, 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+margin_left = -256.0
+margin_top = -171.0
+margin_right = 256.0
+margin_bottom = 171.0
 
 [node name="TitleScreen" type="Control" parent="."]
+visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 __meta__ = {

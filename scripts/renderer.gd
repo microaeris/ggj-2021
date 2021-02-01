@@ -71,6 +71,11 @@ const LEFT_L_CORNER: Array = [
 	[null, CHAR_DIAG],
 ]
 
+const ERASE_LEFT_L_CORNER: Array = [
+	[" "],
+	[null, " "],
+]
+
 const VOXEL_ADD_TOP_LEFT: Array = [
 	[" ", CHAR_BOT_BAR, CHAR_BOT_BAR, CHAR_BOT_BAR],
 	[CHAR_RIGHT_BAR, CHAR_DIAG, " ", " ", " "],
@@ -276,7 +281,8 @@ func _copy_into_screen_buffer(src: Array, dest: Vector2) -> bool:
 		# Nothing to copy
 		return false
 
-	# Edge case handling
+	# Edge case handling - image starts out of bounds but ends in bounds.
+	# allow for copying part of the src!
 	var x_start: int = 0
 	var y_start: int = 0
 	if dest.x < 0:
@@ -645,13 +651,28 @@ func _draw_new_interior_diag_lines(pos: Vector2, num_lines: int) -> void:
 #  |\___*  |
 #  \|______|
 func _fix_left_l_corner(pos: Vector2, map_pos: Vector3) -> void:
+	var offset_pos_to_corner: Vector2 = Vector2(0, 3)  # Constant
+
 	# If voxel exists (below and to the left).
 	var temp: Vector3 = map_pos - Vector3(1, 0, 1)
 	if $Map.is_valid_pos(temp):
 		if $Map.voxel_exists_at_pos(temp):
-			var offset_pos_to_corner: Vector2 = Vector2(0, 3)  # Constant
 			var screen_pos = pos + offset_pos_to_corner
 			_copy_into_screen_buffer(LEFT_L_CORNER, screen_pos)
+
+	# Erase the LEFT_L_CORNER we may have previously drawn. See case_3.png.
+	# If there is a left L corner to our left (if cur voxel didn't exist, then
+	# erase the left L corner that was previously drawn!
+	# This is a super specific edge case!!
+	temp = map_pos + Vector3(1, 0, 0)
+	if $Map.voxel_exists_at_pos(temp) and $Map.is_there_voxel_below(temp) and \
+		$Map.is_there_voxel_below(map_pos):
+		# Erase the LEFT_L_CORNER!
+		var neightbor_pos: Vector2 = pos + Vector2(VOXEL_WIDTH, 0)
+		var screen_pos: Vector2 = neightbor_pos + offset_pos_to_corner
+		if get_screen_buffer(screen_pos) == LEFT_L_CORNER[0][0] and \
+			get_screen_buffer(screen_pos + Vector2(1, 1)) == LEFT_L_CORNER[1][1]:
+			_copy_into_screen_buffer(ERASE_LEFT_L_CORNER, screen_pos)
 
 
 #   ___
@@ -1005,19 +1026,23 @@ func voxel_map_space_to_screen_space(pos: Vector3) -> Vector2:
 	"""
 	assert($Map.is_valid_pos(pos))
 	var screen_center: Vector2 = Vector2(SCREEN_CHAR_WIDTH / 2, SCREEN_CHAR_HEIGHT / 2)
-	# This is where _camera_center_voxel_map_coords goes!
+	# This is where _camera_center_voxel_map_coords goes on the screen!
 	var top_left_of_camera_center_voxel: Vector2 = screen_center + Vector2(-2, -2)
 
-	var dist_between_voxel_and_camera_center_voxel = pos - _camera_center_voxel_map_coords
+	# dist_between_voxel_and_camera_center_voxel
+	var dist: Vector3 = pos - _camera_center_voxel_map_coords
 
 	# Calculate if the voxel fits on the screen.
-	var screen_space_dist_x: int = dist_between_voxel_and_camera_center_voxel.x * VOXEL_WIDTH
-	var screen_space_dist_y: int = dist_between_voxel_and_camera_center_voxel.z * -VOXEL_HEIGHT
-	screen_space_dist_x += dist_between_voxel_and_camera_center_voxel.y
-	screen_space_dist_y += dist_between_voxel_and_camera_center_voxel.y
+	var screen_space_dist_x: int = dist.x * VOXEL_WIDTH
+	var screen_space_dist_y: int = dist.z * -VOXEL_HEIGHT
+	screen_space_dist_x += dist.y
+	screen_space_dist_y += dist.y
 
 	var voxel_screen_space_pos: Vector2 = top_left_of_camera_center_voxel + \
 		Vector2(screen_space_dist_x, screen_space_dist_y)
+
+	if pos.z >= 7:
+		pass
 	if is_valid_screen_space_pos(voxel_screen_space_pos):
 		return voxel_screen_space_pos
 	else:
@@ -1062,9 +1087,15 @@ func draw_map() -> bool:
 			# Traverse from right to left
 			for x in range($Map.get_map_len_x() - 1, -1, -1):
 				var map_pos: Vector3 = Vector3(x, y, z)
-				var cur_pos: Vector2 = voxel_map_space_to_screen_space(map_pos)
-				if $Map.voxel_exists_at_pos(map_pos):
 
+				var cur_pos: Vector2 = voxel_map_space_to_screen_space(map_pos)
+				if cur_pos == Vector2(-1, -1):
+					continue
+
+				if map_pos.z == 7:
+					continue
+
+				if $Map.voxel_exists_at_pos(map_pos):
 					if not $Map.is_there_voxel_behind(map_pos):
 						if not $Map.is_there_voxel_right(map_pos) and \
 							not $Map.is_there_voxel_below(map_pos):

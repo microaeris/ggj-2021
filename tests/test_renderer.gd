@@ -5,22 +5,23 @@ extends Control
 # Add new test functions to this array
 # I sit here.
 var test_bench = [
-	"_test_is_there",
-	"_test_is_valid_map_pos",
-	"_test_count_y_edge",
-	"_test_count_x_edge",
-	"_test_count_z_edge",
-	"_test_draw_voxel",
-	"_test_draw_row",
-	"_test_draw_col",
-	"_test_draw_left_l",
-	"_test_draw_right_l",
-	"_test_draw_u",
-	"_test_draw_donut",
-	"_test_draw_heart",
-	"_test_draw_diag",
-	"_test_voxel_map_space_to_screen_space",
-	"_test_draw_level_1",
+#	"_test_is_there",
+#	"_test_is_valid_map_pos",
+#	"_test_count_y_edge",
+#	"_test_count_x_edge",
+#	"_test_count_z_edge",
+#	"_test_draw_voxel",
+#	"_test_draw_row",
+#	"_test_draw_col",
+#	"_test_draw_left_l",
+#	"_test_draw_right_l",
+#	"_test_draw_u",
+#	"_test_draw_donut",
+#	"_test_draw_heart",
+#	"_test_draw_diag",
+#	"_test_voxel_map_space_to_screen_space",
+	# "_test_draw_level_1",
+	"_test_small_map",
 ]
 
 ## Builtin Callbacks
@@ -700,6 +701,42 @@ func _test_voxel_map_space_to_screen_space() -> bool:
 	$Renderer.set_camera_center(Vector3(1, 0, 0))
 	var res_pos: Vector2 = $Renderer.voxel_map_space_to_screen_space(Vector3(0, 0, 0))
 	assert(res_pos == Vector2(15, 10))  # I'm not 100% sure this is the right value....
+	return true
+
+
+func _test_small_map() -> bool:
+	var map: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
+		[
+		  [1, 1, 1, 1, 1, 1],
+		],
+		[
+		  [1, 1, 1, 1, 1, 1],
+		],
+		[
+		  [1, 0, 0, 0, 0, 1],
+		],
+		[
+		  [1, 0, 0, 0, 0, 1],
+		],
+		[
+		  [1, 0, 0, 0, 0, 1],
+		],
+		[
+		  [1, 0, 0, 0, 0, 1],
+		],
+		[
+		  [1, 0, 0, 0, 0, 1],
+		],
+		[
+		  [1, 0, 0, 0, 0, 1],
+		],
+	]
+	$Renderer/Map.set_map(map)
+	$Renderer.clear_screen_buffer()
+	# $Renderer.set_camera_center($Renderer/Map.get_center_pos())
+	$Renderer.set_camera_center(Vector3(0,0,7))
+	$Renderer.draw_map()
+	$Renderer.update_screen()
 	return true
 
 
