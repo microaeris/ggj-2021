@@ -3,11 +3,11 @@
 [ext_resource path="res://fonts/petscii.tres" type="DynamicFont" id=1]
 
 [resource]
-RichTextLabel/colors/Font = Color( 0, 1, 0.682353, 1 )
-RichTextLabel/colors/default_color = Color( 0, 1, 0.682353, 1 )
-RichTextLabel/colors/font_color_selected = Color( 0, 1, 0.682353, 1 )
-RichTextLabel/colors/font_color_shadow = Color( 0, 1, 0.682353, 1 )
-RichTextLabel/colors/selection_color = Color( 0, 1, 0.682353, 1 )
+RichTextLabel/colors/Font = Color( 0.941176, 0.964706, 0.941176, 1 )
+RichTextLabel/colors/default_color = Color( 0.941176, 0.964706, 0.941176, 1 )
+RichTextLabel/colors/font_color_selected = Color( 0.941176, 0.964706, 0.941176, 1 )
+RichTextLabel/colors/font_color_shadow = Color( 0.941176, 0.964706, 0.941176, 1 )
+RichTextLabel/colors/selection_color = Color( 0.941176, 0.964706, 0.941176, 1 )
 RichTextLabel/constants/line_separation = 0
 RichTextLabel/constants/shadow_as_outline = 0
 RichTextLabel/constants/shadow_offset_x = 0
