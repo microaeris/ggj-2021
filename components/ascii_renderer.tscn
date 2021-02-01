@@ -4,21 +4,26 @@
 [ext_resource path="res://scripts/renderer.gd" type="Script" id=2]
 [ext_resource path="res://scripts/map.gd" type="Script" id=3]
 [ext_resource path="res://assets/white.png" type="Texture" id=4]
-[ext_resource path="res://assets/CRTShader.shader" type="Shader" id=5]
+[ext_resource path="res://assets/crt.shader" type="Shader" id=5]
 [ext_resource path="res://assets/rolemusic_straw_fields.ogg" type="AudioStream" id=6]
 
 [sub_resource type="ShaderMaterial" id=1]
 shader = ExtResource( 5 )
-shader_param/screen_width = 1024.0
-shader_param/screen_height = 600.0
-shader_param/BarrelPower = 1.1
-shader_param/color_bleeding = 1.0
-shader_param/bleeding_range_x = 2.0
-shader_param/bleeding_range_y = 2.0
-shader_param/lines_distance = 4.0
-shader_param/scan_size = 20.0
-shader_param/scanline_alpha = 0.9
-shader_param/lines_velocity = 30.0
+shader_param/screen_size = Vector2( 320, 180 )
+shader_param/show_curvature = true
+shader_param/curvature_x_amount = 6.0
+shader_param/curvature_y_amount = 4.0
+shader_param/corner_color = Color( 0, 0, 0, 1 )
+shader_param/show_vignette = true
+shader_param/vignette_opacity = 0.2
+shader_param/show_horizontal_scan_lines = true
+shader_param/horizontal_scan_lines_amount = 180.0
+shader_param/horizontal_scan_lines_opacity = 1.0
+shader_param/show_vertical_scan_lines = false
+shader_param/vertical_scan_lines_amount = 320.0
+shader_param/vertical_scan_lines_opacity = 1.0
+shader_param/boost = 1.2
+shader_param/aberration_amount = 0.0
 
 [node name="Renderer" type="Control"]
 anchor_right = 1.0
@@ -55,7 +60,6 @@ __meta__ = {
 }
 
 [node name="CRTShader" type="TextureRect" parent="."]
-visible = false
 material = SubResource( 1 )
 margin_right = 510.0
 margin_bottom = 511.0
