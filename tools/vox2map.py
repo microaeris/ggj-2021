@@ -80,8 +80,10 @@ def build_map(buffer, flag_pos):
         x, y, z, i = ord(x), ord(y), ord(z), ord(i)
         k += 4
 
-        map.set(x, y, z, i)
-        debug(map.get(x, y, z))
+        # Fix to game's coordinate system, which inverts y
+        fixed_y = y_dim - y - 1
+        map.set(x, fixed_y, z, i)
+        debug(map.get(x, fixed_y, z))
 
     map.set_flag(flag_pos.x, flag_pos.y, flag_pos.z)
     map.dump()
