@@ -20,8 +20,8 @@ var test_bench = [
 #	"_test_draw_heart",
 #	"_test_draw_diag",
 #	"_test_voxel_map_space_to_screen_space",
-	# "_test_draw_level_1",
-	"_test_small_map",
+	"_test_draw_level_1",
+	# "_test_small_map",
 ]
 
 ## Builtin Callbacks
@@ -30,6 +30,7 @@ func _ready():
 	for test in test_bench:
 		assert(call(test), "Test failed: " + test)
 	print("All tests passed.")
+
 
 ##
 
@@ -734,7 +735,7 @@ func _test_small_map() -> bool:
 	$Renderer/Map.set_map(map)
 	$Renderer.clear_screen_buffer()
 	# $Renderer.set_camera_center($Renderer/Map.get_center_pos())
-	$Renderer.set_camera_center(Vector3(0,0,7))
+	$Renderer.set_camera_center(Vector3(0,0,0))
 	$Renderer.draw_map()
 	$Renderer.update_screen()
 	return true

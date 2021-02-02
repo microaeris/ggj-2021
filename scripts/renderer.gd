@@ -147,8 +147,6 @@ var _camera_center_voxel_map_coords: Vector3 = Vector3(0,0,0)
 
 func _ready():
 	pass
-#	var map_name = "TestMap1.map"  # TODO(jm) Don't hardcode
-#	$Map.load_map(map_name)
 
 	# Code to test adding infront voxels stufffff
 #	var pos: Vector2 = Vector2(20, 10)
@@ -256,6 +254,11 @@ func is_greater_than_screen_range(point: Vector2) -> bool:
 		(point.x >= SCREEN_CHAR_WIDTH)
 
 
+func is_less_than_screen_range(point: Vector2) -> bool:
+	return (point.y < 0) or \
+		(point.x < 0)
+
+
 func in_screen_range(point: Vector2) -> bool:
 	return (point.y >= 0) and (point.x >= 0) and \
 		(point.y < SCREEN_CHAR_HEIGHT) and (point.x < SCREEN_CHAR_WIDTH)
@@ -275,9 +278,12 @@ func _copy_into_screen_buffer(src: Array, dest: Vector2) -> bool:
 		return false
 
 	var src_width: int = len(src[0])
+	for row in src:
+		src_width = max(src_width, len(row))
+
 	var src_height: int = len(src)
 	var end_of_image: Vector2 = dest + Vector2(src_width, src_height)
-	if not in_screen_range(end_of_image):
+	if is_less_than_screen_range(dest) and is_less_than_screen_range(end_of_image):
 		# Nothing to copy
 		return false
 
@@ -305,7 +311,6 @@ func _copy_into_screen_buffer(src: Array, dest: Vector2) -> bool:
 
 
 func draw_1x1_voxel(pos: Vector2) -> bool:
-	# FIXME - check that pos is in bounds and handle drawing part of a cube
 	_copy_into_screen_buffer(VOXEL_1x1, pos)
 	return true
 
@@ -1041,8 +1046,6 @@ func voxel_map_space_to_screen_space(pos: Vector3) -> Vector2:
 	var voxel_screen_space_pos: Vector2 = top_left_of_camera_center_voxel + \
 		Vector2(screen_space_dist_x, screen_space_dist_y)
 
-	if pos.z >= 7:
-		pass
 	if is_valid_screen_space_pos(voxel_screen_space_pos):
 		return voxel_screen_space_pos
 	else:
@@ -1090,9 +1093,6 @@ func draw_map() -> bool:
 
 				var cur_pos: Vector2 = voxel_map_space_to_screen_space(map_pos)
 				if cur_pos == Vector2(-1, -1):
-					continue
-
-				if map_pos.z == 7:
 					continue
 
 				if $Map.voxel_exists_at_pos(map_pos):
