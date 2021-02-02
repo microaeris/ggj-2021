@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import struct
+import numpy
 from sys import argv
 
 DEBUG_MODE = False
@@ -19,23 +20,34 @@ class VoxelMap(object):
         self.y_dim = y_dim
         self.z_dim = z_dim
 
-        self.map = [[[0 for k in xrange(z_dim)] \
-            for j in xrange(y_dim)] for i in xrange(x_dim)]
-        self.poi = [[[0 for k in xrange(z_dim)] \
-            for j in xrange(y_dim)] for i in xrange(x_dim)]
+        self.map = numpy.zeros((x_dim, y_dim, z_dim)) #.astype(int).tolist()
+        self.poi = numpy.zeros((x_dim, y_dim, z_dim)) #.astype(int).tolist()
+
+        # self.map = [[[0 for k in xrange(z_dim)] \
+        #     for j in xrange(y_dim)] for i in xrange(x_dim)]
+        # self.poi = [[[0 for k in xrange(z_dim)] \
+        #     for j in xrange(y_dim)] for i in xrange(x_dim)]
 
     def get(self, x, y, z):
-        return self.map[z][y][x]
+        return self.map[x,y,z]
+        # return self.map[z][y][x]
 
     def set(self, x, y, z, i):
-        self.map[z][y][x] = i
+        # import pdb; pdb.set_trace()
+        self.map[x, y, z] = i
+        #self.map[z][y][x] = i
 
     def set_flag(self, x, y, z):
-        self.poi[z][y][x] = 1
+        self.poi[x, y, z] = 1
+        #self.poi[z][y][x] = 1
 
     def dump(self):
-        print(self.poi)
-        print(self.map)
+        import sys
+        numpy.set_printoptions(threshold=sys.maxsize)
+        # self.map = self.map[:, ::-1, :]
+        print(self.map.astype(int).tolist())
+        # print(self.poi.astype(int).tolist())
+        # print(self.map.astype(int).tolist())
 
 def int32(buffer, offset):
     return struct.unpack("I", buffer[offset:offset+4])[0]
