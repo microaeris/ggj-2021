@@ -20,8 +20,10 @@ var test_bench = [
 #	"_test_draw_heart",
 #	"_test_draw_diag",
 #	"_test_voxel_map_space_to_screen_space",
-	"_test_draw_level_1",
+#	"_test_draw_level_1",
 	# "_test_small_map",
+	# "_test_move_camera",  # FIXME - this test needs to hash the screen.
+	"_test_map_extends_beyond_screen",
 ]
 
 ## Builtin Callbacks
@@ -737,7 +739,10 @@ func _test_small_map() -> bool:
 	# $Renderer.set_camera_center($Renderer/Map.get_center_pos())
 	$Renderer.set_camera_center(Vector3(0,0,0))
 	$Renderer.draw_map()
-	$Renderer.update_screen()
+	# $Renderer.update_screen()
+
+	# FIXME - need to add screen hash once I can color blocks correctly.
+
 	return true
 
 
@@ -748,4 +753,153 @@ func _test_draw_level_1() -> bool:
 	$Renderer.set_camera_center($Renderer/Map.get_center_pos())
 	$Renderer.draw_map()
 	$Renderer.update_screen()
+	return true
+
+
+func _test_move_camera() -> bool:
+	var map: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
+		[
+		  [1, 1, 1, 1, 1, 1],
+		],
+		[
+		  [1, 1, 1, 1, 1, 1],
+		],
+		[
+		  [1, 0, 0, 0, 0, 1],
+		],
+		[
+		  [1, 0, 0, 0, 0, 1],
+		],
+		[
+		  [1, 0, 0, 0, 0, 1],
+		],
+		[
+		  [1, 0, 0, 0, 0, 1],
+		],
+		[
+		  [1, 0, 0, 0, 0, 1],
+		],
+		[
+		  [1, 0, 0, 0, 0, 1],
+		],
+	]
+	$Renderer/Map.set_map(map)
+	$Renderer.clear_screen_buffer()
+	$Renderer.set_camera_center(Vector3(0,0,0))
+	$Renderer.draw_map()
+	$Renderer.update_screen()
+
+	# FIXME - need to assert all screens look right with hash checks. and can remove the update screen call.
+	var delay: float = .25
+	for i in range(5):
+		$Renderer.set_camera_center(Vector3(i,0,0))
+		$Renderer.draw_map()
+		$Renderer.update_screen()
+		yield(get_tree().create_timer(delay), "timeout")
+	for i in range(5):
+		$Renderer.set_camera_center(Vector3(5,0,i))
+		$Renderer.draw_map()
+		$Renderer.update_screen()
+		yield(get_tree().create_timer(delay), "timeout")
+	for i in range(5):
+		$Renderer.set_camera_center(Vector3(5-i,0,5))
+		$Renderer.draw_map()
+		$Renderer.update_screen()
+		yield(get_tree().create_timer(delay), "timeout")
+	for i in range(5):
+		$Renderer.set_camera_center(Vector3(0,0,5-i))
+		$Renderer.draw_map()
+		$Renderer.update_screen()
+		yield(get_tree().create_timer(delay), "timeout")
+
+	return true
+
+
+func _test_map_extends_beyond_screen() -> bool:
+	var map: Array = [  # 3D array of bools. If >0, it means a vowel exists there.
+		[
+		  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,],
+		],
+		[
+		  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,],
+		],
+		[
+		  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,],
+		],
+		[
+		  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,],
+		],
+		[
+		  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,],
+		],
+		[
+		  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,],
+		],
+		[
+		  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,],
+		],
+		[
+		  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,],
+		],
+		[
+		  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,],
+		],
+		[
+		  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,],
+		],
+		[
+		  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,],
+		],
+		[
+		  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,],
+		],
+		[
+		  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,],
+		],
+		[
+		  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,],
+		],
+		[
+		  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,],
+		],
+	]
+
+	var expected_screen_hash: String = "1af8b882dfc99a056c8fc9ba1e39abe8ad2a61ae"
+	$Renderer/Map.set_map(map)
+	$Renderer.clear_screen_buffer()
+	$Renderer.draw_map()
+	# $Renderer.update_screen()
+
+	var resulting_hash: String = $Renderer.hash_screen_buffer()
+	assert(expected_screen_hash == resulting_hash, "Expected: " + expected_screen_hash + ". Actual: " + resulting_hash)
 	return true

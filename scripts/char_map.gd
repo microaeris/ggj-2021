@@ -52,9 +52,9 @@ func clear_char_map() -> void:
 
 
 func is_valid_pos(pos: Vector3) -> bool:
-	return (pos.z > 0) and (pos.z < len(char_map)) and \
-		(pos.y > 0) and (pos.y < len(char_map[0])) and \
-		(pos.x > 0) and (pos.x < len(char_map[0][0]))
+	return (pos.z >= 0) and (pos.z < len(char_map)) and \
+		(pos.y >= 0) and (pos.y < len(char_map[0])) and \
+		(pos.x >=  0) and (pos.x < len(char_map[0][0]))
 
 
 func get_element(pos: Vector3) -> int:
@@ -75,7 +75,10 @@ func set_element(pos: Vector3, value: int) -> bool:
 	if not is_valid_object_type(value):
 		return false
 	
-	char_map[pos.z][pos.y][pos.x] = value
+	if value == GameState.Object_t.OBJECT_NONE:
+		char_map[pos.z][pos.y][pos.x] = null
+	else:
+		char_map[pos.z][pos.y][pos.x] = value
 	return true
 
 
@@ -83,7 +86,14 @@ func convert_to_voxel_map_coords(pos: Vector3) -> Vector3:
 	pos.y /= VOXEL_DEPTH
 	pos.x /= VOXEL_WIDTH
 	pos.z /= VOXEL_HEIGHT
-	assert($"../Map".is_valid_pos(pos))
+	return pos
+
+
+func convert_to_char_map_coords(pos: Vector3) -> Vector3:
+	pos.y *= VOXEL_DEPTH
+	pos.x *= VOXEL_WIDTH
+	pos.z *= VOXEL_HEIGHT
+	assert(is_valid_pos(pos))
 	return pos
 
 

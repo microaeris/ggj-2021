@@ -7,9 +7,11 @@ func _ready():
 	$Renderer/Map.load_map(map_name)
 	$Renderer.clear_screen_buffer()
 	$Renderer.set_camera_center($Renderer/Map.get_center_pos())
+	assert($Player.set_pos($Renderer/CharMap.convert_to_char_map_coords(Vector3(3, 4, 0))))  # TODO(aw) Don't hardcode...
 	$Renderer.draw_map()
 	print($Renderer.hash_screen_buffer())
 	$Renderer.update_screen()
+	
 
 
 func _input(event):

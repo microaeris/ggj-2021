@@ -80,5 +80,5 @@ __meta__ = {
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 volume_db = -24.0
 autoplay = true
-[connection signal="new_map_loaded" from="Map" to="CharMap" method="_on_Map_new_map_loaded"]
 [connection signal="new_map_loaded" from="Map" to="." method="_on_Map_new_map_loaded"]
+[connection signal="new_map_loaded" from="Map" to="CharMap" method="_on_Map_new_map_loaded"]

@@ -7,8 +7,8 @@ extends Control
 
 ## Constants
 
-const SCREEN_CHAR_WIDTH: int  = 40
-const SCREEN_CHAR_HEIGHT: int  = 25
+const SCREEN_CHAR_WIDTH: int  = 64
+const SCREEN_CHAR_HEIGHT: int  = 41
 
 const VOXEL_WIDTH: int = 3
 const VOXEL_HEIGHT: int = 3
@@ -40,6 +40,7 @@ const CHAR_FILLED_CIRCLE: String = "\ue151"
 const CHAR_DIAMOND: String = "\u2662"
 const CHAR_FILLED_DIAMOND: String = "\ue15a"
 const CHAR_FILLED_UPPER_TRIANGLE: String = "\ue069"
+const CHAR_FILLED_BLOCK: String = "\ue2a0"
 
 const VOXEL_1x1: Array = [
 	[" ", CHAR_BOT_BAR, CHAR_BOT_BAR, CHAR_BOT_BAR],
@@ -127,7 +128,7 @@ var voxel_pattern_dict: Dictionary = {}
 var voxel_dither_patterns: Array = [
 	null,
 	CHAR_DIAG_STRIPES,
-	CHAR_HALF_DITHER,
+	CHAR_FILLED_BLOCK,
 ]
 # The voxel that is in the center of the screen
 var _camera_center_voxel_map_coords: Vector3 = Vector3(0,0,0)
@@ -304,8 +305,12 @@ func _copy_into_screen_buffer(src: Array, dest: Vector2) -> bool:
 		for x in range(x_start, len(src[y])):
 			if src[y][x] != null:
 				# Cut off any part of the src that doesn't fit into the buffer
-				if in_screen_range(Vector2(dest.x + x, dest.y + y)):
-					screen_buffer[dest.y + y][dest.x + x] = src[y][x]
+				# Screen buffer index is (dest.x + x - x_start, dest.y + y - y_start) bc
+				# y indexes into src and we have to convert it back into
+				# screen space coordinates, which means subtracting y_start.
+				# same for x!!
+				if in_screen_range(Vector2(dest.x + x - x_start, dest.y + y - y_start)):
+					screen_buffer[dest.y + y - y_start][dest.x + x - x_start] = src[y][x]
 
 	return true
 
@@ -484,6 +489,8 @@ func _add_voxel_infront_and_top(pos: Vector2, map_pos: Vector3) -> bool:
 	_fix_vert_interior_lines(pos, map_pos)
 	_fix_flat_right_t_corner(pos, map_pos)  # Special case
 	_fix_backwards_t_corner(pos, map_pos)  # Special case
+	_fix_forward_l_corner(pos, map_pos)  # Special case
+	_fix_right_l_corner(pos, map_pos)  # Special case
 
 	return true
 
@@ -514,6 +521,7 @@ func _add_voxel_infront_and_left(pos: Vector2, map_pos: Vector3) -> bool:
 	_fix_forward_t_corner(pos, map_pos)  # Special case
 	_fix_forward_l_corner(pos, map_pos)  # Special case
 	_fix_flat_right_l_corner(pos, map_pos)  # Special case
+	_fix_left_t_corner(pos, map_pos)  # Special case
 
 	return true
 
@@ -683,7 +691,7 @@ func _fix_left_l_corner(pos: Vector2, map_pos: Vector3) -> void:
 #   ___
 #  |\__\
 #  ||  |___
-#  ||  *___\
+#  ||  |v__\
 #  \|______|
 func _fix_right_l_corner(pos: Vector2, map_pos: Vector3) -> void:
 	# If voxel does not exist to the new voxel's right
@@ -1046,10 +1054,11 @@ func voxel_map_space_to_screen_space(pos: Vector3) -> Vector2:
 	var voxel_screen_space_pos: Vector2 = top_left_of_camera_center_voxel + \
 		Vector2(screen_space_dist_x, screen_space_dist_y)
 
-	if is_valid_screen_space_pos(voxel_screen_space_pos):
-		return voxel_screen_space_pos
-	else:
-		return Vector2(-1, -1)
+	return voxel_screen_space_pos
+#	if is_valid_screen_space_pos(voxel_screen_space_pos):
+#		return voxel_screen_space_pos
+#	else:
+#		return Vector2(-1, -1)
 
 
 func color_voxel(pos: Vector2, map_pos: Vector3) -> void:
@@ -1070,23 +1079,13 @@ func color_voxel(pos: Vector2, map_pos: Vector3) -> void:
 
 func draw_map() -> bool:
 	"""
-	Draws the entire map to the screen.
+	Draws the entire voxel map and char map to the screen.
 	"""
-	# # This is the back most voxel that fits on the screen! It may not be
-	# # rendered in the end bc it was erase by a block in front of it,
-	# # but it would be rendered at some point!!!
-	# var bottom_right_voxel: Vector3 = ???
-	# var bottom_right_voxel_screen_pos: Vector2 = voxel_map_space_to_screen_space(bottom_right_voxel)
-	# var cur_pos: Vector2 = bottom_right_voxel_screen_pos
 
 	# Traverse back to front
 	for y in range($Map.get_map_len_y()):
-		# cur_pos.y = bottom_right_voxel_screen_pos.y + y
-		# cur_pos.x = bottom_right_voxel_screen_pos.x + y
-		# var original_x = cur_pos.x
 		# Traverse bottom to top
 		for z in range($Map.get_map_len_z()):
-			# cur_pos.x = original_x
 			# Traverse from right to left
 			for x in range($Map.get_map_len_x() - 1, -1, -1):
 				var map_pos: Vector3 = Vector3(x, y, z)
@@ -1122,29 +1121,40 @@ func draw_map() -> bool:
 						else:
 							_add_voxel_infront_and_left_top(cur_pos, map_pos)
 
-			# 	cur_pos.x -= VOXEL_WIDTH
-			# cur_pos.y -= VOXEL_HEIGHT
+#					color_voxel(cur_pos, map_pos)
 
+				# Draw objects from char map!! Like the player.
+				var char_top_right_front_pos: Vector3 = $CharMap.convert_to_char_map_coords(map_pos)
+				# Traverse back to front
+				for char_y in range($CharMap.VOXEL_DEPTH):
+					# Traverse bottom to top
+					for char_z in range($CharMap.VOXEL_HEIGHT):
+						# Traverse from right to left
+						for char_x in range($CharMap.VOXEL_WIDTH - 1, -1, -1):
+							var char_pos: Vector3 = char_top_right_front_pos - Vector3(char_x, char_y, char_z)
+							if $CharMap.get_element(char_pos):
+								var object: int = $CharMap.get_element(char_pos)
+								var obj_str: String = GameState.Object_char[object]
+								var obj_screen_pos: Vector2 = cur_pos
+								obj_screen_pos.y += $CharMap.VOXEL_HEIGHT - char_z
+								obj_screen_pos.x += 1 + char_x
+								obj_screen_pos.y += char_y
+								obj_screen_pos.x += char_y
+								set_screen_buffer(obj_screen_pos, obj_str)
 
-	# Separate pass to do coloring. Doing it this way because of edge case 2
-	# seen under res://edge_cases/case_2.png
-	# This way isn't the most efficient. Ideally should combine both for loops.
-	# Traverse back to front
-	for y in range($Map.get_map_len_y()):
-		# cur_pos.y = bottom_right_voxel_screen_pos.y + y
-		# cur_pos.x = bottom_right_voxel_screen_pos.x + y
-		# var original_x = cur_pos.x
-		# Traverse bottom to top
-		for z in range($Map.get_map_len_z()):
-			# cur_pos.x = original_x
-			# Traverse from right to left
-			for x in range($Map.get_map_len_x() - 1, -1, -1):
-				var map_pos: Vector3 = Vector3(x, y, z)
-				var cur_pos: Vector2 = voxel_map_space_to_screen_space(map_pos)
-				if $Map.voxel_exists_at_pos(map_pos):
-					color_voxel(cur_pos, map_pos)
-			# 	cur_pos.x -= VOXEL_WIDTH
-			# cur_pos.y -= VOXEL_HEIGHT
+	# # Separate pass to do coloring. Doing it this way because of edge case 2
+	# # seen under res://edge_cases/case_2.png
+	# # This way isn't the most efficient. Ideally should combine both for loops.
+	# # Traverse back to front
+	# for y in range($Map.get_map_len_y()):
+	# 	# Traverse bottom to top
+	# 	for z in range($Map.get_map_len_z()):
+	# 		# Traverse from right to left
+	# 		for x in range($Map.get_map_len_x() - 1, -1, -1):
+	# 			var map_pos: Vector3 = Vector3(x, y, z)
+	# 			var cur_pos: Vector2 = voxel_map_space_to_screen_space(map_pos)
+	# 			if $Map.voxel_exists_at_pos(map_pos):
+	# 				color_voxel(cur_pos, map_pos)
 
 	return true
 
