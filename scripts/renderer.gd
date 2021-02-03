@@ -1124,14 +1124,14 @@ func draw_map() -> bool:
 #					color_voxel(cur_pos, map_pos)
 
 				# Draw objects from char map!! Like the player.
-				var char_top_right_front_pos: Vector3 = $CharMap.convert_to_char_map_coords(map_pos)
+				var char_bottom_left_back_pos: Vector3 = $CharMap.convert_to_char_map_coords(map_pos)
 				# Traverse back to front
 				for char_y in range($CharMap.VOXEL_DEPTH):
 					# Traverse bottom to top
 					for char_z in range($CharMap.VOXEL_HEIGHT):
 						# Traverse from right to left
 						for char_x in range($CharMap.VOXEL_WIDTH - 1, -1, -1):
-							var char_pos: Vector3 = char_top_right_front_pos - Vector3(char_x, char_y, char_z)
+							var char_pos: Vector3 = char_bottom_left_back_pos + Vector3(char_x, char_y, char_z)
 							if $CharMap.get_element(char_pos):
 								var object: int = $CharMap.get_element(char_pos)
 								var obj_str: String = GameState.Object_char[object]
@@ -1141,6 +1141,7 @@ func draw_map() -> bool:
 								obj_screen_pos.y += char_y
 								obj_screen_pos.x += char_y
 								set_screen_buffer(obj_screen_pos, obj_str)
+								# FIXME - takes 3 up presses to move up (W) on the screen. Why? Check char map coords.
 
 	# # Separate pass to do coloring. Doing it this way because of edge case 2
 	# # seen under res://edge_cases/case_2.png
