@@ -456,6 +456,7 @@ func _add_voxel_infront(pos: Vector2, map_pos: Vector3) -> bool:
 	_fix_flat_right_t_corner(pos, map_pos)  # Special case
 	_fix_forward_t_corner(pos, map_pos)  # Special case
 	_fix_forward_l_corner(pos, map_pos)  # Special case
+	_fix_flat_left_t_corner(pos, map_pos)  # Special case
 
 	# Extra special case
 	# Retain the interior lines added by a previous voxel's call to _fix_forward_l_corner.
@@ -917,6 +918,28 @@ func _fix_backwards_t_corner(pos: Vector2, map_pos: Vector3) -> void:
 				# screen_buffer[screen_pos.y][screen_pos.x] = CHAR_RIGHT_BAR
 				set_screen_buffer(screen_pos, CHAR_RIGHT_BAR)
 				screen_pos.y += 1
+
+
+#	 _________
+#	|\______  \
+#	\|_____*\__\
+#	       \|__|
+func _fix_flat_left_t_corner(pos: Vector2, map_pos: Vector3) -> void:
+	# If a voxel exists behind and and to the left
+	var temp: Vector3 = map_pos + Vector3(-1, -1, 0)
+	if $Map.is_valid_pos(temp):
+		if $Map.voxel_exists_at_pos(temp):
+			var offset_pos_to_interior_line: Vector2 = Vector2(0, 3)  # Constant
+			var screen_pos = pos + offset_pos_to_interior_line
+			# FIXME: -1 for good measure, not sure if I need it.
+			# Even if I draw more lines, any voxel drawn on top of the voxel
+			# at map_pos will erase the extra vertical lines. In the end, only
+			# one vertical line shows up! That's fine. It'll look like
+			# res://edge_cases/case_4.png.
+			var num_interior_vert_lines = VOXEL_HEIGHT - 1
+			for i in range(num_interior_vert_lines):
+				set_screen_buffer(screen_pos, CHAR_RIGHT_BAR)
+				screen_pos.y -= 1
 
 
 # drew the wrong corner...
