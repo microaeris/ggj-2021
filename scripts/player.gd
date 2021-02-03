@@ -166,5 +166,9 @@ func calc_player_map_collision(new_pos: Vector3) -> Vector3:
 	# Can't move the player into a voxel. Sorry fam you can't pass through walls.
 	if map_node.voxel_exists_at_pos(map_pos):
 		return player_pos
+		
+	# Check if player is now falling
+	if not map_node.is_there_voxel_below(map_pos) and map_pos.z > 0:
+		player_falling = true
 	
 	return new_pos
