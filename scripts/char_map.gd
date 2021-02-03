@@ -3,14 +3,14 @@ extends Control
 ## Constants
 
 const VOXEL_WIDTH: int = 3
-const VOXEL_DEPTH: int = 2
+const VOXEL_DEPTH: int = 1
 const VOXEL_HEIGHT: int = 3
 
 ## Locals
 
 # 3D array that is larger than the voxel map.
-# Each position in the voxel map maps to 2x3 positions 
-# Each position holds an int. 
+# Each position in the voxel map maps to 3x2x3 positions 
+# Each position holds an GameState.Object_t. 
 var char_map: Array = []
 var CHAR_MAP_WIDTH: int = 0 
 var CHAR_MAP_DEPTH: int = 0 
@@ -24,7 +24,7 @@ func _ready():
 	
 ##
 
-func set_char_map_size() -> void:  # FIXME - figure out where to call this.
+func set_char_map_size() -> void:  
 	"""
 	This depends on the map to be loaded.
 	"""

@@ -35,7 +35,7 @@ func _process(delta):
 
 	if up_pressed or down_pressed or left_pressed or right_pressed:
 		press_delta += delta
-		if press_delta > BUTTON_WAIT_MS:
+		if press_delta >= BUTTON_WAIT_MS:
 			press_delta -= BUTTON_WAIT_MS
 			press_delta = max(0, press_delta)
 			handle_wasd_input()

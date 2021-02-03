@@ -1141,7 +1141,7 @@ func draw_map() -> bool:
 								obj_screen_pos.y += char_y
 								obj_screen_pos.x += char_y
 								set_screen_buffer(obj_screen_pos, obj_str)
-								# FIXME - takes 3 up presses to move up (W) on the screen. Why? Check char map coords.
+								# FIXME - takes 3 up presses to move up (W) on the screen. Why?
 
 	# # Separate pass to do coloring. Doing it this way because of edge case 2
 	# # seen under res://edge_cases/case_2.png
