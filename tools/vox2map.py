@@ -19,10 +19,10 @@ class VoxelMap(object):
         self.y_dim = y_dim
         self.z_dim = z_dim
 
-        self.map = [[[0 for k in xrange(z_dim)] \
-            for j in xrange(y_dim)] for i in xrange(x_dim)]
-        self.poi = [[[0 for k in xrange(z_dim)] \
-            for j in xrange(y_dim)] for i in xrange(x_dim)]
+        self.map = [[[0 for k in xrange(x_dim)] \
+            for j in xrange(y_dim)] for i in xrange(z_dim)]
+        self.poi = [[[0 for k in xrange(x_dim)] \
+            for j in xrange(y_dim)] for i in xrange(z_dim)]
 
     def get(self, x, y, z):
         return self.map[z][y][x]
@@ -34,7 +34,7 @@ class VoxelMap(object):
         self.poi[z][y][x] = 1
 
     def dump(self):
-        print(self.poi)
+        # print(self.poi)
         print(self.map)
 
 def int32(buffer, offset):
