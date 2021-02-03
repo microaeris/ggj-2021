@@ -7,7 +7,10 @@ func _ready():
 	$Renderer/Map.load_map(map_name)
 	$Renderer.clear_screen_buffer()
 	$Renderer.set_camera_center($Renderer/Map.get_center_pos())
-	assert($Player.set_pos($Renderer/CharMap.convert_to_char_map_coords(Vector3(3, 4, 0))))  # TODO(aw) Don't hardcode...
+	assert($Player.set_pos($Renderer/CharMap.convert_to_char_map_coords(Vector3(3, 4, 0))))  # TODO(aw) This value works for level 1. Don't hardcode...
+#	var player_pos: Vector3 = $Renderer/Map.get_center_pos()
+#	player_pos.x *= 1.2
+#	assert($Player.set_pos($Renderer/CharMap.convert_to_char_map_coords(player_pos)))  # TODO(aw) This value works for cutout cube. don't hard code!
 	$Renderer.draw_map()
 	print($Renderer.hash_screen_buffer())
 	$Renderer.update_screen()
