@@ -7,6 +7,8 @@ extends Control
 
 ## Constants
 
+const USE_SHORT_INTERIOR_LINES: bool = false
+
 const SCREEN_CHAR_WIDTH: int  = 64
 const SCREEN_CHAR_HEIGHT: int  = 41
 
@@ -572,12 +574,17 @@ func _fix_vert_interior_lines(pos: Vector2, map_pos: Vector3) -> void:
 		screen_pos.y += 1
 
 	# Draw new interior lines.
-	var num_interior_vert_lines = count_z_edge(map_pos)
+	var num_interior_vert_lines = count_z_edge(map_pos) * VOXEL_HEIGHT - 2
 
-	# Special case to round down the number of interior lines. If there's only
-	# 1 voxel, draw no extra interior edges.
-	if num_interior_vert_lines == 1:
-		num_interior_vert_lines = 0
+
+	if USE_SHORT_INTERIOR_LINES:
+		num_interior_vert_lines += 2
+		num_interior_vert_lines /= VOXEL_HEIGHT
+
+		# Special case to round down the number of interior lines. If there's only
+		# 1 voxel, draw no extra interior edges.
+		if num_interior_vert_lines == 1:
+			num_interior_vert_lines = 0
 
 	_draw_new_interior_vert_lines(pos, num_interior_vert_lines)
 
@@ -594,12 +601,16 @@ func _fix_horiz_interior_lines(pos: Vector2, map_pos: Vector3) -> void:
 		screen_pos.x += 1
 
 	# Draw new interior lines.
-	var num_interior_horiz_lines = count_x_edge(map_pos)
+	var num_interior_horiz_lines = count_x_edge(map_pos) * VOXEL_WIDTH - 2
 
-	# Special case to round down the number of interior lines. If there's only
-	# 1 voxel, draw no extra interior edges.
-	if num_interior_horiz_lines == 1:
-		num_interior_horiz_lines = 0
+	if USE_SHORT_INTERIOR_LINES:
+		num_interior_horiz_lines += 2
+		num_interior_horiz_lines /= VOXEL_WIDTH
+
+		# Special case to round down the number of interior lines. If there's only
+		# 1 voxel, draw no extra interior edges.
+		if num_interior_horiz_lines == 1:
+			num_interior_horiz_lines = 0
 
 	_draw_new_interior_horiz_lines(pos, num_interior_horiz_lines)
 
@@ -620,12 +631,13 @@ func _fix_diag_interior_lines(pos: Vector2, map_pos: Vector3) -> void:
 	# Draw new interior lines.
 	var num_interior_diag_lines = count_y_edge(map_pos)
 
-	# Special case to round down the number of interior lines. If there's only
-	# 1 voxel, draw no extra interior edges.
-	if num_interior_diag_lines <= 3:
-		num_interior_diag_lines = 0
-	else:
-		num_interior_diag_lines -= 3
+	if USE_SHORT_INTERIOR_LINES:
+		# Special case to round down the number of interior lines. If there's only
+		# 1 voxel, draw no extra interior edges.
+		if num_interior_diag_lines <= 3:
+			num_interior_diag_lines = 0
+		else:
+			num_interior_diag_lines -= 3
 
 	_draw_new_interior_diag_lines(pos, num_interior_diag_lines)
 
