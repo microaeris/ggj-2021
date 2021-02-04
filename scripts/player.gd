@@ -8,6 +8,8 @@ extends Control
 
 const BUTTON_WAIT_MS: float = .25
 const MAX_JUMP_HEIGHT: int = 4
+# Time between vertical movements
+const VERT_MOVE_WAIT_MS: float = .5
 
 ## Locals
 
@@ -19,8 +21,9 @@ var up_pressed: bool = false
 var down_pressed: bool = false
 var left_pressed: bool = false
 var right_pressed: bool = false
-var wasd_press_delta: float = 0.0
 
+var wasd_press_delta: float = 0.0
+var vert_move_delta: float = 0.0
 var player_cur_jump_height: float = 0.0
 var vertical_velocity: float = 0.0
 var vertical_acceleration: float = 0.0
@@ -37,7 +40,8 @@ func _ready():
 
 
 func _process(delta):
-	handle_jump_and_fall(false)
+	var old_pos: Vector3 = player_pos
+	handle_jump_and_fall(false, delta)
 
 	if up_pressed or down_pressed or left_pressed or right_pressed:
 		wasd_press_delta += delta
@@ -46,9 +50,12 @@ func _process(delta):
 			wasd_press_delta = max(0, wasd_press_delta)
 			handle_wasd_input()
 
+	handle_player_moved(old_pos)  # Draws screen and stuff
+
 
 func _input(event):
 	var handled: bool = false
+	var old_pos: Vector3 = player_pos
 
 	if event.is_action_pressed("ui_up"):
 		up_pressed = true
@@ -96,8 +103,18 @@ func _input(event):
 	if handled:
 		get_tree().set_input_as_handled()
 		handle_wasd_input()
+		handle_player_moved(old_pos)
+
 
 ##
+
+
+func handle_player_moved(old_pos: Vector3):
+	if old_pos != player_pos:
+		renderer_node.clear_screen_buffer()
+		renderer_node.draw_map()
+		renderer_node.update_screen()
+
 
 func handle_wasd_input() -> void:
 	var new_pos: Vector3 = player_pos
@@ -109,37 +126,40 @@ func handle_wasd_input() -> void:
 		new_pos.x -= 1
 	elif right_pressed:
 		new_pos.x += 1
-	if set_pos(calc_player_map_collision(new_pos)):
-		renderer_node.clear_screen_buffer()
-		renderer_node.draw_map()
-		renderer_node.update_screen()
+	set_pos(calc_player_map_collision(new_pos))
 
 
-func handle_jump_and_fall(start_new_jump: bool) -> void:
+func handle_jump_and_fall(start_new_jump: bool, delta: float = 0) -> void:
 	var new_pos: Vector3 = player_pos
 	if start_new_jump:
 		player_cur_jump_height = 1
 		new_pos.z += 1
 	elif player_jumping:
-		if player_cur_jump_height < MAX_JUMP_HEIGHT:
-			player_cur_jump_height += 1
-			new_pos.z += 1
-		elif player_cur_jump_height == MAX_JUMP_HEIGHT:
-			player_jumping = false
-			player_falling = true
-			player_cur_jump_height = 0
-			# Pause at top frame for 1 tick, so don't do `new_pos.z -= 1`.
+		vert_move_delta += delta
+		# Add a delay between frames
+		if vert_move_delta >= VERT_MOVE_WAIT_MS:
+			vert_move_delta = max(0, vert_move_delta - VERT_MOVE_WAIT_MS)
+			if player_cur_jump_height < MAX_JUMP_HEIGHT:
+				player_cur_jump_height += 1
+				new_pos.z += 1
+			elif player_cur_jump_height == MAX_JUMP_HEIGHT:
+				player_jumping = false
+				player_falling = true
+				player_cur_jump_height = 0
+				# Pause at top frame for 1 tick, so don't do `new_pos.z -= 1`.
 	elif player_falling:
-		new_pos.z -= 1
+		vert_move_delta += delta
+		# Add a delay between frames
+		if vert_move_delta >= VERT_MOVE_WAIT_MS:
+			vert_move_delta = max(0, vert_move_delta - VERT_MOVE_WAIT_MS)
+			new_pos.z -= 1
 
 	if calc_player_map_collision(new_pos) == new_pos:
 		set_pos(new_pos)
-		renderer_node.clear_screen_buffer()
-		renderer_node.draw_map()
-		renderer_node.update_screen()
 	else:
 		# Collided with map and so now player is done falling.
 		player_falling = false
+		vert_move_delta = 0.0
 
 
 func set_pos(pos: Vector3) -> bool:
