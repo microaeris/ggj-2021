@@ -9,7 +9,7 @@ extends Control
 const BUTTON_WAIT_MS: float = .25
 const MAX_JUMP_HEIGHT: int = 4
 # Time between vertical movements
-const VERT_MOVE_WAIT_MS: float = .5
+const VERT_MOVE_WAIT_S: float = .1
 
 ## Locals
 
@@ -24,6 +24,7 @@ var right_pressed: bool = false
 
 var wasd_press_delta: float = 0.0
 var vert_move_delta: float = 0.0
+var total_fall_time: float = 0.0
 var player_cur_jump_height: float = 0.0
 var vertical_velocity: float = 0.0
 var vertical_acceleration: float = 0.0
@@ -137,8 +138,8 @@ func handle_jump_and_fall(start_new_jump: bool, delta: float = 0) -> void:
 	elif player_jumping:
 		vert_move_delta += delta
 		# Add a delay between frames
-		if vert_move_delta >= VERT_MOVE_WAIT_MS:
-			vert_move_delta = max(0, vert_move_delta - VERT_MOVE_WAIT_MS)
+		if vert_move_delta >= VERT_MOVE_WAIT_S:
+			vert_move_delta = max(0, vert_move_delta - VERT_MOVE_WAIT_S)
 			if player_cur_jump_height < MAX_JUMP_HEIGHT:
 				player_cur_jump_height += 1
 				new_pos.z += 1
@@ -148,10 +149,12 @@ func handle_jump_and_fall(start_new_jump: bool, delta: float = 0) -> void:
 				player_cur_jump_height = 0
 				# Pause at top frame for 1 tick, so don't do `new_pos.z -= 1`.
 	elif player_falling:
+		total_fall_time += delta
 		vert_move_delta += delta
 		# Add a delay between frames
-		if vert_move_delta >= VERT_MOVE_WAIT_MS:
-			vert_move_delta = max(0, vert_move_delta - VERT_MOVE_WAIT_MS)
+		var attenuated_vert_move_wait_s: float = (1 - (2 * total_fall_time)) * VERT_MOVE_WAIT_S
+		if vert_move_delta >= attenuated_vert_move_wait_s:
+			vert_move_delta = max(0, vert_move_delta - VERT_MOVE_WAIT_S)
 			new_pos.z -= 1
 
 	if calc_player_map_collision(new_pos) == new_pos:
@@ -160,6 +163,7 @@ func handle_jump_and_fall(start_new_jump: bool, delta: float = 0) -> void:
 		# Collided with map and so now player is done falling.
 		player_falling = false
 		vert_move_delta = 0.0
+		total_fall_time = 0.0
 
 
 func set_pos(pos: Vector3) -> bool:
