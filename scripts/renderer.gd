@@ -525,6 +525,7 @@ func _add_voxel_infront_and_left(pos: Vector2, map_pos: Vector3) -> bool:
 	_fix_forward_l_corner(pos, map_pos)  # Special case
 	_fix_flat_right_l_corner(pos, map_pos)  # Special case
 	_fix_left_t_corner(pos, map_pos)  # Special case
+	_fix_flat_left_t_corner(pos, map_pos)  # Special case
 
 	return true
 
@@ -1176,7 +1177,6 @@ func draw_map() -> bool:
 								obj_screen_pos.y += char_y
 								obj_screen_pos.x += char_y
 								set_screen_buffer(obj_screen_pos, obj_str)
-								# FIXME - takes 3 up presses to move up (W) on the screen. Why?
 
 	# # Separate pass to do coloring. Doing it this way because of edge case 2
 	# # seen under res://edge_cases/case_2.png
