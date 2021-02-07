@@ -132,8 +132,6 @@ var voxel_dither_patterns: Array = [
 	CHAR_DIAG_STRIPES,
 	CHAR_FILLED_BLOCK,
 ]
-# The voxel that is in the center of the screen
-var _camera_center_voxel_map_coords: Vector3 = Vector3(0,0,0)
 
 # Coordinate system
 #	z - column
@@ -172,15 +170,6 @@ func _ready():
 #	update_screen()
 
 ##
-
-func set_camera_center(pos: Vector3) -> void:
-	assert($Map.is_valid_pos(pos))
-	_camera_center_voxel_map_coords = pos
-
-
-func get_camera_center(pos: Vector3) -> Vector3:
-	return _camera_center_voxel_map_coords
-
 
 func assign_voxel_to_pattern() -> void:
 	# Choose colors for Jordan's voxels
@@ -1079,7 +1068,7 @@ func voxel_map_space_to_screen_space(pos: Vector3) -> Vector2:
 	var top_left_of_camera_center_voxel: Vector2 = screen_center + Vector2(-2, -2)
 
 	# dist_between_voxel_and_camera_center_voxel
-	var dist: Vector3 = pos - _camera_center_voxel_map_coords
+	var dist: Vector3 = pos - $Camera.get_camera_center()
 
 	# Calculate if the voxel fits on the screen.
 	var screen_space_dist_x: int = dist.x * VOXEL_WIDTH
@@ -1200,4 +1189,4 @@ func _on_Map_new_map_loaded():
 	assign_voxel_to_pattern()
 
 	# Choose a default center
-	set_camera_center($Map.get_center_pos())
+	$Camera.set_camera_center($Map.get_center_pos() + Vector3(0, 5, 0))

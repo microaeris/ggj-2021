@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://assets/theme.tres" type="Theme" id=1]
 [ext_resource path="res://scripts/renderer.gd" type="Script" id=2]
@@ -6,6 +6,7 @@
 [ext_resource path="res://assets/white.png" type="Texture" id=4]
 [ext_resource path="res://scripts/char_map.gd" type="Script" id=5]
 [ext_resource path="res://assets/crt.shader" type="Shader" id=6]
+[ext_resource path="res://scripts/camera.gd" type="Script" id=7]
 
 [sub_resource type="ShaderMaterial" id=1]
 shader = ExtResource( 6 )
@@ -80,5 +81,13 @@ __meta__ = {
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 volume_db = -24.0
 autoplay = true
-[connection signal="new_map_loaded" from="Map" to="." method="_on_Map_new_map_loaded"]
+
+[node name="Camera" type="Control" parent="."]
+margin_right = 40.0
+margin_bottom = 40.0
+script = ExtResource( 7 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
 [connection signal="new_map_loaded" from="Map" to="CharMap" method="_on_Map_new_map_loaded"]
+[connection signal="new_map_loaded" from="Map" to="." method="_on_Map_new_map_loaded"]
