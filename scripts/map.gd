@@ -298,17 +298,34 @@ var map = null
 # Flag location as Vector3
 var flag = null
 
+onready var player_node = $"../../Player"
+onready var char_map_node = $"../CharMap"
+
+## Builtin Callbacks
+
 func _ready():
 	pass
+
+##
 
 func load_map(map_name):
 	if map_name == "TestMap1.map":
 		map = MAP_1_DATA
 		poi = MAP_1_POI
 		flag = MAP_1_FLAG
+		char_map_node._on_Map_new_map_loaded()
+		config_player_pos()
 		emit_signal("new_map_loaded")
 	else:
 		print("Unsupported map")
+
+
+func config_player_pos() -> void:
+	"""
+	Chooses a starting position for the player on the currently loaded map.
+	"""
+	# FIXME - Jordan's map system should pass in a point of interest defining the player's starting position. Don't hard code this position!!
+	assert(player_node.set_pos_voxel_coord(Vector3(5, 10, 0)))
 
 
 func set_map(map_arr):

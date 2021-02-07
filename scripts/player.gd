@@ -30,6 +30,7 @@ var vertical_velocity: float = 0.0
 var vertical_acceleration: float = 0.0
 
 onready var char_map_node = $"../Renderer/CharMap"
+onready var camera_node = $"../Renderer/Camera"
 onready var map_node = $"../Renderer/Map"
 onready var renderer_node = $"../Renderer"
 
@@ -113,6 +114,7 @@ func _input(event):
 func handle_player_moved(old_pos: Vector3):
 	if old_pos != player_pos:
 		renderer_node.clear_screen_buffer()
+		camera_node.update_camera_position()
 		renderer_node.draw_map()
 		renderer_node.update_screen()
 
@@ -166,11 +168,18 @@ func handle_jump_and_fall(start_new_jump: bool, delta: float = 0) -> void:
 		total_fall_time = 0.0
 
 
+func set_pos_voxel_coord(pos: Vector3) -> bool:
+	"""
+	Args:
+		pos: coordinates in voxel map space.
+	"""
+	return set_pos(char_map_node.convert_to_char_map_coords(pos))
+
+
 func set_pos(pos: Vector3) -> bool:
 	"""
 	Args:
 		pos: coordinates in char map space.
-
 	"""
 	if $"../Renderer/CharMap".is_valid_pos(pos):
 		assert($"../Renderer/CharMap".set_element(player_pos, GameState.Object_t.OBJECT_NONE))
@@ -178,6 +187,10 @@ func set_pos(pos: Vector3) -> bool:
 		player_pos = pos
 		return true
 	return false
+
+
+func get_pos_in_voxel_coords() -> Vector3:
+	return char_map_node.convert_to_voxel_map_coords(player_pos)
 
 
 func calc_player_map_collision(new_pos: Vector3) -> Vector3:

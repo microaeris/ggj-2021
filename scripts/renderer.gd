@@ -1106,7 +1106,6 @@ func draw_map() -> bool:
 	"""
 	Draws the entire voxel map and char map to the screen.
 	"""
-
 	# Traverse back to front
 	for y in range($Map.get_map_len_y()):
 		# Traverse bottom to top
@@ -1188,5 +1187,7 @@ func _on_Map_new_map_loaded():
 	# Assign voxel type to dither pattern
 	assign_voxel_to_pattern()
 
-	# Choose a default center
-	$Camera.set_camera_center($Map.get_center_pos() + Vector3(0, 5, 0))
+	# Choose a default center - center around character.
+	var pos: Vector3 = $"../Player".get_pos_in_voxel_coords()
+	print(pos)
+	$Camera.set_camera_center(pos)

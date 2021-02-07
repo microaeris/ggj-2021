@@ -89,5 +89,4 @@ script = ExtResource( 7 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
-[connection signal="new_map_loaded" from="Map" to="CharMap" method="_on_Map_new_map_loaded"]
 [connection signal="new_map_loaded" from="Map" to="." method="_on_Map_new_map_loaded"]
