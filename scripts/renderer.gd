@@ -1063,12 +1063,18 @@ func voxel_map_space_to_screen_space(pos: Vector3) -> Vector2:
 	return negative values in the vector.
 	"""
 	assert($Map.is_valid_pos(pos))
+	var cam_pos_char: Vector3 = $Camera.get_camera_center()
+	var cam_pos_voxel: Vector3 = $CharMap.convert_to_voxel_map_coords(cam_pos_char)
+
+	# This is where camera's center voxel goes on the screen!
 	var screen_center: Vector2 = Vector2(SCREEN_CHAR_WIDTH / 2, SCREEN_CHAR_HEIGHT / 2)
-	# This is where _camera_center_voxel_map_coords goes on the screen!
-	var top_left_of_camera_center_voxel: Vector2 = screen_center + Vector2(-2, -2)
+	var char_z: int = $CharMap.VOXEL_HEIGHT - (int(cam_pos_char.z) % $CharMap.VOXEL_HEIGHT)
+	var char_x: int = int(cam_pos_char.x) % $CharMap.VOXEL_WIDTH
+	var delta: Vector2 = Vector2(char_x + 1, char_z + 1)
+	var top_left_of_camera_center_voxel: Vector2 = screen_center - delta
 
 	# dist_between_voxel_and_camera_center_voxel
-	var dist: Vector3 = pos - $Camera.get_camera_center()
+	var dist: Vector3 = pos - cam_pos_voxel
 
 	# Calculate if the voxel fits on the screen.
 	var screen_space_dist_x: int = dist.x * VOXEL_WIDTH
@@ -1080,10 +1086,29 @@ func voxel_map_space_to_screen_space(pos: Vector3) -> Vector2:
 		Vector2(screen_space_dist_x, screen_space_dist_y)
 
 	return voxel_screen_space_pos
-#	if is_valid_screen_space_pos(voxel_screen_space_pos):
-#		return voxel_screen_space_pos
-#	else:
-#		return Vector2(-1, -1)
+
+
+func char_map_space_to_screen_space(pos: Vector3) -> Vector2:
+	var voxel_pos: Vector3 = $CharMap.convert_to_voxel_map_coords(pos)
+	var screen_pos: Vector2 = voxel_map_space_to_screen_space(voxel_pos)
+	if screen_pos == Vector2(-1, -1):
+		# Pos is invalid so return an error
+		return Vector2(-1, -1)
+
+	var char_z: int = int(pos.z) % $CharMap.VOXEL_HEIGHT
+	var char_y: int = int(pos.z) % $CharMap.VOXEL_DEPTH
+	var char_x: int = int(pos.z) % $CharMap.VOXEL_WIDTH
+
+	screen_pos.y += $CharMap.VOXEL_HEIGHT - char_z
+	screen_pos.x += 1 + char_x
+	screen_pos.y += char_y
+	screen_pos.x += char_y
+
+	if is_valid_screen_space_pos(screen_pos):
+		return screen_pos
+	else:
+		# Pos is invalid so return an error
+		return Vector2(-1, -1)
 
 
 func color_voxel(pos: Vector2, map_pos: Vector3) -> void:
@@ -1188,6 +1213,4 @@ func _on_Map_new_map_loaded():
 	assign_voxel_to_pattern()
 
 	# Choose a default center - center around character.
-	var pos: Vector3 = $"../Player".get_pos_in_voxel_coords()
-	print(pos)
-	$Camera.set_camera_center(pos)
+	$Camera.set_camera_center($"../Player".get_pos())

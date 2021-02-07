@@ -9,22 +9,22 @@ const VOXEL_HEIGHT: int = 3
 ## Locals
 
 # 3D array that is larger than the voxel map.
-# Each position in the voxel map maps to 3x2x3 positions 
-# Each position holds an GameState.Object_t. 
+# Each position in the voxel map maps to 3x2x3 positions
+# Each position holds an GameState.Object_t.
 var char_map: Array = []
-var CHAR_MAP_WIDTH: int = 0 
-var CHAR_MAP_DEPTH: int = 0 
-var CHAR_MAP_HEIGHT: int = 0 
+var CHAR_MAP_WIDTH: int = 0
+var CHAR_MAP_DEPTH: int = 0
+var CHAR_MAP_HEIGHT: int = 0
 
 ## Builtin Callbacks
 
 func _ready():
 	pass
 
-	
+
 ##
 
-func set_char_map_size() -> void:  
+func set_char_map_size() -> void:
 	"""
 	This depends on the map to be loaded.
 	"""
@@ -35,7 +35,7 @@ func set_char_map_size() -> void:
 
 func clear_char_map() -> void:
 	"""
-	Set all points as void. 
+	Set all points as void.
 	"""
 	assert(CHAR_MAP_WIDTH != 0)
 	assert(CHAR_MAP_HEIGHT != 0)
@@ -71,10 +71,10 @@ func is_valid_object_type(value: int) -> bool:
 func set_element(pos: Vector3, value: int) -> bool:
 	if not is_valid_pos(pos):
 		return false
-	
+
 	if not is_valid_object_type(value):
 		return false
-	
+
 	if value == GameState.Object_t.OBJECT_NONE:
 		char_map[pos.z][pos.y][pos.x] = null
 	else:
@@ -83,13 +83,24 @@ func set_element(pos: Vector3, value: int) -> bool:
 
 
 func convert_to_voxel_map_coords(pos: Vector3) -> Vector3:
+	"""
+	Args
+		pos: char map coordinates
+	"""
 	pos.y /= VOXEL_DEPTH
 	pos.x /= VOXEL_WIDTH
 	pos.z /= VOXEL_HEIGHT
+	pos.y = floor(pos.y)
+	pos.x = floor(pos.x)
+	pos.z = floor(pos.z)
 	return pos
 
 
 func convert_to_char_map_coords(pos: Vector3) -> Vector3:
+	"""
+	Args
+		pos: voxel map coordinates
+	"""
 	pos.y *= VOXEL_DEPTH
 	pos.x *= VOXEL_WIDTH
 	pos.z *= VOXEL_HEIGHT
@@ -97,6 +108,18 @@ func convert_to_char_map_coords(pos: Vector3) -> Vector3:
 	return pos
 
 
+func get_map_len_x() -> int:
+	return len(char_map[0][0])
+
+
+func get_map_len_y() -> int:
+	return len(char_map[0])
+
+
+func get_map_len_z() -> int:
+	return len(char_map)
+
+
 func _on_Map_new_map_loaded() -> void:
-	set_char_map_size() 
+	set_char_map_size()
 	clear_char_map()

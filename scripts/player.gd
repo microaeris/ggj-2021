@@ -189,6 +189,10 @@ func set_pos(pos: Vector3) -> bool:
 	return false
 
 
+func get_pos() -> Vector3:
+	return player_pos
+
+
 func get_pos_in_voxel_coords() -> Vector3:
 	return char_map_node.convert_to_voxel_map_coords(player_pos)
 
