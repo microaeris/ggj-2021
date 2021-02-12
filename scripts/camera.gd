@@ -77,6 +77,4 @@ func update_camera_position() -> void:
 		cam_pos.z -= 1
 		cam_pos.z = max(cam_pos.z, 0)
 
-	print(cam_pos)
-
 	set_camera_center(cam_pos)

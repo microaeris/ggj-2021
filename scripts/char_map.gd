@@ -58,9 +58,12 @@ func is_valid_pos(pos: Vector3) -> bool:
 
 
 func get_element(pos: Vector3) -> int:
-	if is_valid_pos(pos):
-		return char_map[pos.z][pos.y][pos.x]
-	return GameState.Object_t.OBJECT_NONE
+	return char_map[pos.z][pos.y][pos.x]
+
+	# The following code was occassionally spiking processing time.
+	# if is_valid_pos(pos):
+	# 	return char_map[pos.z][pos.y][pos.x]
+	# return GameState.Object_t.OBJECT_NONE
 
 
 func is_valid_object_type(value: int) -> bool:

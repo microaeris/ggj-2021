@@ -9,7 +9,7 @@ extends Control
 const BUTTON_WAIT_MS: float = .25
 const MAX_JUMP_HEIGHT: int = 4
 # Time between vertical movements
-const VERT_MOVE_WAIT_S: float = .1
+const VERT_MOVE_WAIT_S: float = 0.0 # .1
 
 ## Locals
 
@@ -45,12 +45,12 @@ func _process(delta):
 	var old_pos: Vector3 = player_pos
 	handle_jump_and_fall(false, delta)
 
-	if up_pressed or down_pressed or left_pressed or right_pressed:
-		wasd_press_delta += delta
-		if wasd_press_delta >= BUTTON_WAIT_MS:
-			wasd_press_delta -= BUTTON_WAIT_MS
-			wasd_press_delta = max(0, wasd_press_delta)
-			handle_wasd_input()
+	# if up_pressed or down_pressed or left_pressed or right_pressed:
+	# 	wasd_press_delta += delta
+	# 	if wasd_press_delta >= BUTTON_WAIT_MS:
+	# 		wasd_press_delta -= BUTTON_WAIT_MS
+	# 		wasd_press_delta = max(0, wasd_press_delta)
+	# 		handle_wasd_input()
 
 	handle_player_moved(old_pos)  # Draws screen and stuff
 

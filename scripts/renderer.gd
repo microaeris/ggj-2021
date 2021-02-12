@@ -12,6 +12,8 @@ const USE_SHORT_INTERIOR_LINES: bool = false
 const SCREEN_CHAR_WIDTH: int  = 64
 const SCREEN_CHAR_HEIGHT: int  = 41
 
+const SCREEN_CENTER: Vector2 = Vector2(SCREEN_CHAR_WIDTH / 2, SCREEN_CHAR_HEIGHT / 2)
+
 const VOXEL_WIDTH: int = 3
 const VOXEL_HEIGHT: int = 3
 
@@ -212,15 +214,16 @@ func update_screen() -> void:
 	"""
 	assert(len(screen_buffer) <= SCREEN_CHAR_HEIGHT)
 
-	Text.set_text("")
+	var local_str = ""
 	for row in screen_buffer:
 		assert(len(row) <= SCREEN_CHAR_WIDTH)
 		for element in row:
 			if element == null:
-				Text.text += " "
+				local_str += " "
 			else:
-				Text.text += element
-		Text.text += "\n"
+				local_str += element
+		local_str += "\n"
+	Text.set_text(local_str)
 	clear_screen_buffer()
 
 
@@ -1062,30 +1065,22 @@ func voxel_map_space_to_screen_space(pos: Vector3) -> Vector2:
 	top left of the voxel. If the voxel is off the screen, this function will
 	return negative values in the vector.
 	"""
-	assert($Map.is_valid_pos(pos))
+	# assert($Map.is_valid_pos(pos))  # Enable if I need to debug.
 	var cam_pos_char: Vector3 = $Camera.get_camera_center()
-	var cam_pos_voxel: Vector3 = $CharMap.convert_to_voxel_map_coords(cam_pos_char)
 
 	# This is where camera's center voxel goes on the screen!
-	var screen_center: Vector2 = Vector2(SCREEN_CHAR_WIDTH / 2, SCREEN_CHAR_HEIGHT / 2)
 	var char_z: int = $CharMap.VOXEL_HEIGHT - (int(cam_pos_char.z) % $CharMap.VOXEL_HEIGHT)
 	var char_x: int = int(cam_pos_char.x) % $CharMap.VOXEL_WIDTH
 	var delta: Vector2 = Vector2(char_x + 1, char_z + 1)
-	var top_left_of_camera_center_voxel: Vector2 = screen_center - delta
+	var top_left_of_camera_center_voxel: Vector2 = SCREEN_CENTER - delta
 
-	# dist_between_voxel_and_camera_center_voxel
-	var dist: Vector3 = pos - cam_pos_voxel
+	# dist_between_voxel_and_camera_center_voxel = pos - cam_pos_voxel
+	var dist: Vector3 = pos - $CharMap.convert_to_voxel_map_coords(cam_pos_char)
 
 	# Calculate if the voxel fits on the screen.
-	var screen_space_dist_x: int = dist.x * VOXEL_WIDTH
-	var screen_space_dist_y: int = dist.z * -VOXEL_HEIGHT
-	screen_space_dist_x += dist.y
-	screen_space_dist_y += dist.y
-
-	var voxel_screen_space_pos: Vector2 = top_left_of_camera_center_voxel + \
-		Vector2(screen_space_dist_x, screen_space_dist_y)
-
-	return voxel_screen_space_pos
+	top_left_of_camera_center_voxel.x += (dist.x * VOXEL_WIDTH) + dist.y
+	top_left_of_camera_center_voxel.y += (dist.z * -VOXEL_HEIGHT) + dist.y
+	return top_left_of_camera_center_voxel
 
 
 func char_map_space_to_screen_space(pos: Vector3) -> Vector2:
