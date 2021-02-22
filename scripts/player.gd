@@ -4,19 +4,29 @@ extends Control
 
 # Each block has 3 spaces wide for players to stand and two blocks deep.
 
+## Enums
+
+enum player_action_t {
+	STANDING,
+	GRABBING,
+	JUMPING,
+	FLOATING,
+	FALLING,
+}
+
 ## Consts
 
 const BUTTON_WAIT_MS: float = .25
 const MAX_JUMP_HEIGHT: int = 4
 # Time between vertical movements
-const VERT_MOVE_WAIT_S: float = 0.0 # .1
+const VERT_MOVE_WAIT_S: float = .05
+# Time floating at the max height
+const FLOAT_TIME_S: float = .2
 
 ## Locals
 
 var player_pos: Vector3 = Vector3(0,0,0)  # In char map coords
-var player_grabbing: bool = false
-var player_jumping: bool = false
-var player_falling: bool = false
+var player_action: int = player_action_t.STANDING
 var up_pressed: bool = false
 var down_pressed: bool = false
 var left_pressed: bool = false
@@ -28,6 +38,7 @@ var total_fall_time: float = 0.0
 var player_cur_jump_height: float = 0.0
 var vertical_velocity: float = 0.0
 var vertical_acceleration: float = 0.0
+var float_time_delta: float = 0.0
 
 onready var char_map_node = $"../Renderer/CharMap"
 onready var camera_node = $"../Renderer/Camera"
@@ -97,17 +108,17 @@ func _input(event):
 		wasd_press_delta = 0.0
 	elif event.is_action_pressed("grab"):
 		handled = true
-		if not player_jumping and not player_falling:
-			player_grabbing = true
+		if player_action == player_action_t.STANDING:
+			player_action = player_action_t.GRABBING
 	elif event.is_action_released("grab"):
 		handled = true
-		player_grabbing = false
+		player_action = player_action_t.GRABBING
 		wasd_press_delta = 0.0
 	elif event.is_action_pressed("jump"):
 		handled = true
 		# This line prevents double jumping and chaining jumps.
-		if not player_grabbing and not player_jumping and not player_falling:
-			player_jumping = true
+		if player_action == player_action_t.STANDING:
+			player_action = player_action_t.JUMPING
 			handle_jump_and_fall(true)
 
 	if handled:
@@ -145,7 +156,7 @@ func handle_jump_and_fall(start_new_jump: bool, delta: float = 0) -> void:
 	if start_new_jump:
 		player_cur_jump_height = 1
 		new_pos.z += 1
-	elif player_jumping:
+	elif player_action == player_action_t.JUMPING:
 		vert_move_delta += delta
 		# Add a delay between frames
 		if vert_move_delta >= VERT_MOVE_WAIT_S:
@@ -154,11 +165,10 @@ func handle_jump_and_fall(start_new_jump: bool, delta: float = 0) -> void:
 				player_cur_jump_height += 1
 				new_pos.z += 1
 			elif player_cur_jump_height == MAX_JUMP_HEIGHT:
-				player_jumping = false
-				player_falling = true
-				player_cur_jump_height = 0
-				# Pause at top frame for 1 tick, so don't do `new_pos.z -= 1`.
-	elif player_falling:
+				start_floating()
+	elif player_action == player_action_t.FLOATING:
+		handle_floating(delta)
+	elif player_action == player_action_t.FALLING:
 		total_fall_time += delta
 		vert_move_delta += delta
 		# Add a delay between frames
@@ -171,9 +181,25 @@ func handle_jump_and_fall(start_new_jump: bool, delta: float = 0) -> void:
 		set_pos(new_pos)
 	else:
 		# Collided with map and so now player is done falling.
-		player_falling = false
+		player_action = player_action_t.STANDING
 		vert_move_delta = 0.0
 		total_fall_time = 0.0
+
+
+func start_floating() -> void:
+	# Pause at top frame for n ticks, so don't do `new_pos.z -= 1`.
+	# Just started floating
+	assert(float_time_delta == 0)
+	player_action = player_action_t.FLOATING
+	player_cur_jump_height = 0
+
+
+func handle_floating(delta: float) -> void:
+	assert(player_action == player_action_t.FLOATING)
+	float_time_delta += delta
+	if float_time_delta >= FLOAT_TIME_S:
+		float_time_delta = 0
+		player_action = player_action_t.FALLING
 
 
 func set_pos_voxel_coord(pos: Vector3) -> bool:
@@ -220,7 +246,8 @@ func calc_player_map_collision(new_pos: Vector3) -> Vector3:
 		return player_pos
 
 	# Check if player is now falling
-	if not map_node.is_there_voxel_below(map_pos) and map_pos.z > 0:
-		player_falling = true
+	if player_action == player_action_t.STANDING:
+		if not map_node.is_there_voxel_below(map_pos) and map_pos.z > 0:
+			player_action = player_action_t.FALLING
 
 	return new_pos
