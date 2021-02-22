@@ -34,6 +34,9 @@ onready var camera_node = $"../Renderer/Camera"
 onready var map_node = $"../Renderer/Map"
 onready var renderer_node = $"../Renderer"
 
+# Store the previous player pos in this frame.
+# The player may not have moved.
+var old_pos: Vector3 = Vector3(0,0,0)
 
 ## Builtin Callbacks
 
@@ -42,22 +45,27 @@ func _ready():
 
 
 func _process(delta):
-	var old_pos: Vector3 = player_pos
+	old_pos = player_pos
 	handle_jump_and_fall(false, delta)
 
-	# if up_pressed or down_pressed or left_pressed or right_pressed:
-	# 	wasd_press_delta += delta
-	# 	if wasd_press_delta >= BUTTON_WAIT_MS:
-	# 		wasd_press_delta -= BUTTON_WAIT_MS
-	# 		wasd_press_delta = max(0, wasd_press_delta)
-	# 		handle_wasd_input()
+	if up_pressed or down_pressed or left_pressed or right_pressed:
+		wasd_press_delta += delta
+		if wasd_press_delta >= BUTTON_WAIT_MS:
+			wasd_press_delta -= BUTTON_WAIT_MS
+			wasd_press_delta = max(0, wasd_press_delta)
+			handle_wasd_input()
 
-	handle_player_moved(old_pos)  # Draws screen and stuff
+	update()
+
+
+func _draw():
+	# Draws screen and stuff
+	handle_player_moved()
 
 
 func _input(event):
 	var handled: bool = false
-	var old_pos: Vector3 = player_pos
+	old_pos = player_pos
 
 	if event.is_action_pressed("ui_up"):
 		up_pressed = true
@@ -105,13 +113,13 @@ func _input(event):
 	if handled:
 		get_tree().set_input_as_handled()
 		handle_wasd_input()
-		handle_player_moved(old_pos)
+		handle_player_moved()
 
 
 ##
 
 
-func handle_player_moved(old_pos: Vector3):
+func handle_player_moved():
 	if old_pos != player_pos:
 		renderer_node.clear_screen_buffer()
 		camera_node.update_camera_position()

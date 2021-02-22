@@ -107,7 +107,7 @@ func convert_to_char_map_coords(pos: Vector3) -> Vector3:
 	pos.y *= VOXEL_DEPTH
 	pos.x *= VOXEL_WIDTH
 	pos.z *= VOXEL_HEIGHT
-	assert(is_valid_pos(pos))
+	# assert(is_valid_pos(pos))  # was causing processing spikes since this function is called so frequently. TODO: Add assert that is disabled in prod
 	return pos
 
 
